@@ -73,3 +73,11 @@
 - **Decision:** Ship reviewable `DeployPairband` script gated by `PAIRBAND_ALLOW_BROADCAST`, refresh read-only RPC preflight (gas floor, token codehashes, Multicall3From). Keep manifest `verified:false` with null contract addresses until real txs. Defer PositionManager on Arc until a reviewed Pairband WETH-stub/descriptor plan exists (Arc has no WETH; native USDC is already IERC20). Label any future PoolManager as Pairband-deployed.
 - **Source/evidence:** docs/evidence/o10/, deployments/arc-testnet.json
 - **Unresolved:** Deployer authorization; live lifecycle receipts; POSM-on-Arc design
+
+## ADR-0009 — Review prep without audit badge (O28)
+
+- **ID/date/owner:** ADR-0009 / 2026-09-07 / pairband-build
+- **Question:** How to prepare Gate4 materials before O26/O27 and external review?
+- **Decision:** Publish an honest review bundle under `docs/review/` and `docs/evidence/o28/` with readiness ledger marking audit/mainnet/O10 broadcast as pending/blocked. Do **not** issue an audit badge. Treat O26/O27 as remaining prerequisites for full O28 acceptance. ETHGlobal README/FEEDBACK are stubs only.
+- **Source/evidence:** docs/review/, docs/evidence/o28/, docs/ethglobal/
+- **Unresolved:** External reviewer engagement; counsel; O10 broadcast; O26/O27

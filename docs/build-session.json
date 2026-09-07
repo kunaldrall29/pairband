@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "productVersion": "options-v2",
   "repository": "pairband",
-  "currentStage": "O10",
+  "currentStage": "O28",
   "completedStages": [
     "O00",
     "O01",
@@ -16,13 +16,15 @@
     "O09"
   ],
   "partialStages": {
-    "O10": "Dry-run deploy scripts + Arc read-only preflight; broadcasts pending authorization; no lifecycle tx hashes"
+    "O10": "Dry-run + read-only Arc preflight; broadcasts pending authorization",
+    "O28": "Review bundle/readiness ledger prepared; no external audit; O26/O27 prerequisites unmet"
   },
   "blockedStages": {
     "mainnet": "Null until official Arc mainnet + Uniswap periphery verified",
-    "audit": "Requires independent external review (O28)",
-    "O06-official-uniswap-arc": "Official deployments absent; local Pairband-deployed fixture only",
-    "O10-broadcast": "Managed deployer authorization + PAIRBAND_ALLOW_BROADCAST required"
+    "audit": "Requires independent external review \u2014 prep only at O28",
+    "O06-official-uniswap-arc": "Official deployments absent; Pairband-deployed path only",
+    "O10-broadcast": "Managed deployer authorization + PAIRBAND_ALLOW_BROADCAST required",
+    "O28-gate4": "External reviewer + counsel + O26/O27 + O10 lifecycle evidence required"
   },
   "optionalStagesEnabled": [],
   "evidence": {
@@ -33,8 +35,10 @@
     "O07": "docs/evidence/o07/",
     "O08": "docs/evidence/o08/",
     "O09": "docs/evidence/o09/",
-    "O10": "docs/evidence/o10/"
+    "O10": "docs/evidence/o10/",
+    "O28": "docs/evidence/o28/",
+    "review": "docs/review/"
   },
-  "lastCommit": "f9634f258ade24c668e4b5b8475b0dc1dbc0c29d",
-  "nextAction": "Authorized Arc broadcast to complete O10 lifecycle evidence; O12 service prep may start against fixtures/labeled pending manifest. No audit/mainnet claims."
+  "lastCommit": "f786fe77431b132be63297557613c591e5b73e88",
+  "nextAction": "Do not badge audit. Engage external review only after re-freeze; continue O10 broadcast when authorized; O26/O27 for Gate3. O12 prep may proceed on fixtures."
 }
