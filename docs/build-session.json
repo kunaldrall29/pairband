@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "productVersion": "options-v2",
   "repository": "pairband",
-  "currentStage": "O19",
+  "currentStage": "O22",
   "completedStages": [
     "O00",
     "O01",
@@ -18,7 +18,10 @@
     "O08",
     "O12",
     "O13",
-    "O18"
+    "O18",
+    "O19",
+    "O20",
+    "O21"
   ],
   "partialStages": {
     "O14": "Educational payoff series + unavailable marks; indexer fixtures enable next pass",
@@ -43,8 +46,11 @@
     "O12": "docs/evidence/o12/",
     "O13-scaffold": "docs/evidence/o13/",
     "O13": "docs/evidence/o13/",
-    "O18": "docs/evidence/o18/"
+    "O18": "docs/evidence/o18/",
+    "O19": "docs/evidence/o19/",
+    "O20": "docs/evidence/o20/",
+    "O21": "docs/evidence/o21/"
   },
   "lastCommit": "4982fe2",
-  "nextAction": "O19 Earn mint/sell flow or O10 Arc deploy for executable quotes; do not invent live premiums."
+  "nextAction": "O22 advanced LP UI or O10 Arc deploy for executable txs; keep preview honesty."
 }

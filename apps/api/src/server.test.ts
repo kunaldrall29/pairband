@@ -232,6 +232,26 @@ test("auth nonce replay and CSRF on reminders", async () => {
     },
   });
   assert.equal(quotesDisabled.statusCode, 503);
+  process.env.INDEXER_MODE = "fixture";
+  const sellFixture = await app.inject({
+    method: "POST",
+    url: "/v1/quotes",
+    payload: {
+      seriesId: `0x${"11".repeat(32)}`,
+      side: "sell",
+      optionUnits: "100000000",
+      account: `0x${"55".repeat(20)}`,
+      slippageBps: 50,
+    },
+  });
+  assert.equal(sellFixture.statusCode, 200);
+  assert.equal((sellFixture.json() as { executable: boolean }).executable, false);
+  const positions = await app.inject({
+    method: "GET",
+    url: `/v1/wallets/0x${"55".repeat(20)}/positions`,
+  });
+  assert.equal(positions.statusCode, 200);
+
 
   if (prevIndexer === undefined) delete process.env.INDEXER_MODE;
   else process.env.INDEXER_MODE = prevIndexer;

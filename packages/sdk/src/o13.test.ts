@@ -5,6 +5,7 @@ import {
   PrepareRequestSchema,
   TransactionIntentRequestSchema,
   buildFixtureBuyQuote,
+  buildFixtureSellQuote,
   encodeBuyExactOutputCalldata,
   encodeVaultCalldata,
   assertBuyExactOutputSemantics,
@@ -131,4 +132,16 @@ test("transaction intent schema requires hash shape", () => {
       transactionHash: "not-a-hash",
     }),
   );
+});
+
+test("fixture sell quote exact-input labeled", () => {
+  const q = buildFixtureSellQuote({
+    seriesId: `0x${"11".repeat(32)}`,
+    side: "sell",
+    optionUnits: "100000000",
+    account: `0x${"55".repeat(20)}`,
+    slippageBps: 50,
+  });
+  assert.equal(q.side, "sell");
+  assert.equal(q.executable, false);
 });

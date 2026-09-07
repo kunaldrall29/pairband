@@ -1,10 +1,5 @@
-import { RoutePlaceholder } from "../../../components/RoutePlaceholder";
+import { MarketsTable } from "../../../components/markets/MarketsViews";
 
 export default function MarketsPage() {
-  return (
-    <RoutePlaceholder
-      title="Markets"
-      purpose="Compare series and executable quotes when the indexer and quote API are online. Missing quotes stay unavailable — never zero."
-    />
-  );
+  return <MarketsTable />;
 }

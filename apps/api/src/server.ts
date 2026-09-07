@@ -37,6 +37,7 @@ import {
   fixtureLifecycleBatches,
   replayAll,
   indexerLag,
+  FIXTURE_ADDR,
   type IndexerState,
 } from "@pairband/indexer";
 import {
@@ -52,6 +53,7 @@ import {
   PrepareRequestSchema,
   TransactionIntentRequestSchema,
   buildFixtureBuyQuote,
+  buildFixtureSellQuote,
   generateOpenApiDocument,
   encodeBuyExactOutputCalldata,
   encodeVaultCalldata,
@@ -436,13 +438,18 @@ export async function buildServer(env: Env, opts: BuildServerOptions = {}) {
       const deployment = loadPublicDeployment(env);
       const mode = resolveIndexerMode();
 
+      if (mode === "fixture" || mode === "anvil") {
+        const quote =
+          body.side === "sell" ? buildFixtureSellQuote(body) : buildFixtureBuyQuote(body);
+        return reply.code(200).send({ ...quote, requestId: req.requestId });
+      }
+
       if (body.side === "sell") {
-        // Sell quotes need live inventory/simulation; do not invent bids.
         if (env.PAIRBAND_MODE === "preview" || !deployment.verified) {
           return reply.code(503).send(
             apiError(
               "UNVERIFIED",
-              "Sell quotes require verified deployment simulation. No fabricated bids.",
+              "Sell quotes require verified deployment simulation or INDEXER_MODE=fixture. No fabricated bids.",
               req.requestId,
               { statusCode: 503, retryable: true },
             ).body,
@@ -453,12 +460,6 @@ export async function buildServer(env: Env, opts: BuildServerOptions = {}) {
             statusCode: 501,
           }).body,
         );
-      }
-
-      // Exact-output buy: fixture-labeled economics when INDEXER_MODE=fixture|anvil
-      if (mode === "fixture" || mode === "anvil") {
-        const quote = buildFixtureBuyQuote(body);
-        return reply.code(200).send({ ...quote, requestId: req.requestId });
       }
 
       if (env.PAIRBAND_MODE === "preview" || !deployment.verified) {
@@ -765,6 +766,73 @@ export async function buildServer(env: Env, opts: BuildServerOptions = {}) {
       note: "Monitoring only — a submitted hash is not purchased coverage",
       requestId: req.requestId,
     });
+  });
+
+  app.get("/v1/wallets/:address/positions", async (req, reply) => {
+    const address = String((req.params as { address: string }).address ?? "");
+    if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
+      return reply.code(400).send(
+        apiError("VALIDATION", "Valid address required", req.requestId).body,
+      );
+    }
+    const mode = resolveIndexerMode();
+    if (mode !== "fixture" && mode !== "anvil") {
+      return reply.code(503).send(
+        apiError(
+          "INDEXER_UNAVAILABLE",
+          "Wallet positions require indexer (fixture|anvil|rpc). No invented balances.",
+          req.requestId,
+          { statusCode: 503, retryable: true },
+        ).body,
+      );
+    }
+    const state = loadFixtureIndexerState(mode);
+    const isFixtureAccount =
+      address.toLowerCase() === FIXTURE_ADDR.ACCOUNT.toLowerCase();
+    const series = [...state.series.values()][0];
+    const longBal = series
+      ? state.balances.get(
+          `${series.longToken.toLowerCase()}:${FIXTURE_ADDR.ACCOUNT.toLowerCase()}`,
+        ) ?? 0n
+      : 0n;
+    const longs =
+      isFixtureAccount && series && longBal > 0n
+        ? [
+            {
+              kind: "long",
+              seriesId: series.seriesId,
+              token: series.longToken,
+              rawAmount: longBal.toString(),
+              costBasis: "unknown",
+              vault: series.vault,
+              strikePerUnit6: series.strikePerUnit6.toString(),
+              exerciseStart: series.exerciseStart.toString(),
+              exerciseEnd: series.exerciseEnd.toString(),
+            },
+          ]
+        : [];
+    const receipts =
+      isFixtureAccount && series
+        ? [
+            {
+              kind: "receipt",
+              seriesId: series.seriesId,
+              token: series.writerReceipt,
+              rawAmount: "0",
+              costBasis: "unknown",
+              note: "Receipt balance requires mint evidence — zero until confirmed",
+            },
+          ]
+        : [];
+    return {
+      address: address.toLowerCase(),
+      source: state.sourceLabel,
+      longs,
+      receipts,
+      liquidity: [],
+      note: "Labeled fixture/anvil projections only. Long/receipt/LP stay separate. Not Arc live wallet inventory.",
+      requestId: req.requestId,
+    };
   });
 
   app.get("/v1/reference-marks", async (req, reply) => {

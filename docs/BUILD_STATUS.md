@@ -23,6 +23,9 @@ Product: Pairband options-v2.
 | O17 | complete (preview) | docs/evidence/o17/ | Screenshots/Playwright matrix optional follow-up |
 | O13 | complete (local/fixture) | docs/evidence/o13/ | Live quoter sim needs verified deploy |
 | O18 | complete (preview/fixture UI) | docs/evidence/o18/ | Funded Anvil/Arc buy needs verified router |
+| O21 | complete (preview/fixture UI) | docs/evidence/o21/ | Live exercise needs verified vault |
+| O20 | complete (preview/fixture UI) | docs/evidence/o20/ | Live depth needs indexed trades |
+| O19 | complete (preview/fixture UI) | docs/evidence/o19/ | Live mint needs verified vault |
 | O09–O10, O19–O32 | pending | — | Arc deploy O10; earn/markets next |
 
 ### Production / audit / mainnet

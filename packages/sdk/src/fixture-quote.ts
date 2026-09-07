@@ -61,3 +61,40 @@ export function buildFixtureBuyQuote(req: QuoteRequest): QuoteResponse {
     note: "Labeled fixture exact-output economics (0.02 USDC/option disclosed). Not Arc live liquidity. Cannot prepare a real transaction in preview.",
   };
 }
+
+export function buildFixtureSellQuote(req: QuoteRequest): QuoteResponse {
+  const units = BigInt(req.optionUnits);
+  const expected = (units * FIXTURE_PREMIUM_USDC6_PER_OPTION_UNIT) / 1_000_000n;
+  const minUSDC6 = (expected * BigInt(10_000 - req.slippageBps)) / 10_000n;
+  const expiresAt = new Date(Date.now() + 30_000).toISOString();
+  return {
+    quoteId: stableQuoteId(["sell", req.seriesId, req.optionUnits, req.account, String(req.slippageBps)]),
+    seriesId: req.seriesId,
+    side: "sell",
+    optionUnits: req.optionUnits,
+    expectedUSDC6: expected.toString(),
+    minUSDC6: minUSDC6.toString(),
+    poolId: (`0x${"88".repeat(32)}`) as `0x${string}`,
+    poolFeeIncluded: true,
+    protocolIssuanceFee6: "0",
+    expiresAt,
+    tradingCutoff: null,
+    spender: null,
+    allowanceNeeded: "0",
+    executable: false,
+    provenance: {
+      chainId: 31_337,
+      blockNumber: "3",
+      blockHash: (`0x${"cc".repeat(32)}`) as `0x${string}`,
+      observedAt: new Date().toISOString(),
+      source: "fixture",
+      stale: false,
+      indexedThroughBlock: "3",
+      label: "fixture",
+    },
+    unsignedTransaction: null,
+    simulation: "skipped",
+    warningCodes: ["FIXTURE_NOT_EXECUTABLE", "PREVIEW_MODE", "INDICATIVE_ONLY"],
+    note: "Labeled fixture exact-input sale economics. Indicative only — not guaranteed after a separate mint. Not Arc live liquidity.",
+  };
+}
