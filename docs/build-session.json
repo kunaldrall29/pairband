@@ -13,6 +13,9 @@
     "O06",
     "O07"
   ],
+  "partialStages": {
+    "O08": "Core/periphery pin + OptionTickMath + maker LP lifecycle; PositionManager NFT E2E pending"
+  },
   "blockedStages": {
     "mainnet": "Null until official Arc mainnet + Uniswap periphery verified",
     "audit": "Requires independent external review (O28)",
@@ -24,8 +27,9 @@
     "O02": "docs/evidence/o02/",
     "O03-O05": "docs/evidence/o03/",
     "O06": "docs/evidence/o06/",
-    "O07": "docs/evidence/o07/"
+    "O07": "docs/evidence/o07/",
+    "O08": "docs/evidence/o08/"
   },
-  "lastCommit": "f7ca9e58ee03569d52641caafbf46d2e19be3b04",
-  "nextAction": "O08 LP PositionManager integration. Label Pairband-deployed instances honestly. Do not claim audit/mainnet."
+  "lastCommit": null,
+  "nextAction": "Finish O08 PositionManager NFT mint/decrease/collect against Pairband hook. Do not claim audit/mainnet/official Uniswap Arc."
 }

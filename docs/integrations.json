@@ -57,12 +57,12 @@
     {
       "name": "uniswap-v4-periphery",
       "required": true,
-      "status": "blocked-official-arc-absent",
+      "status": "pinned-local-partial",
       "evidence": [
-        "docs/evidence/o01/uniswap-arc-decision.md",
-        "docs/evidence/o06/verification.md"
+        "docs/evidence/o08/verification.md",
+        "packages/contracts/foundry.lock"
       ],
-      "blocker": "PositionManager seed deferred to O08; no official Arc periphery"
+      "blocker": "PositionManager NFT Action planner E2E against Pairband hook not finished; official Arc listing absent"
     },
     {
       "name": "circle-funding",

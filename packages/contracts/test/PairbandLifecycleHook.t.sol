@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
 import {IHooks} from "@uniswap/v4-core/src/interfaces/IHooks.sol";
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
+import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 import {PoolManager} from "@uniswap/v4-core/src/PoolManager.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
@@ -123,9 +124,9 @@ contract PairbandLifecycleHookTest is Test {
         key = hook.getPoolKey(poolId);
     }
 
-    function _liqParams(int256 liquidityDelta) internal pure returns (IPoolManager.ModifyLiquidityParams memory) {
+    function _liqParams(int256 liquidityDelta) internal pure returns (ModifyLiquidityParams memory) {
         // Narrow band + modest L keeps 6-decimal token requirements within minted balances.
-        return IPoolManager.ModifyLiquidityParams({
+        return ModifyLiquidityParams({
             tickLower: -60,
             tickUpper: 60,
             liquidityDelta: liquidityDelta,
@@ -160,7 +161,7 @@ contract PairbandLifecycleHookTest is Test {
         vm.prank(buyer);
         swapRouter.swap(
             key,
-            IPoolManager.SwapParams({
+            SwapParams({
                 zeroForOne: zeroForOne,
                 amountSpecified: -int256(100_000),
                 sqrtPriceLimitX96: zeroForOne ? TickMath.MIN_SQRT_PRICE + 1 : TickMath.MAX_SQRT_PRICE - 1
@@ -215,7 +216,7 @@ contract PairbandLifecycleHookTest is Test {
         vm.expectRevert(); // WrappedError(HookCallFailed) around TradingDisabled
         swapRouter.swap(
             key,
-            IPoolManager.SwapParams({
+            SwapParams({
                 zeroForOne: zeroForOne,
                 amountSpecified: -int256(10_000),
                 sqrtPriceLimitX96: zeroForOne ? TickMath.MIN_SQRT_PRICE + 1 : TickMath.MAX_SQRT_PRICE - 1
@@ -248,7 +249,7 @@ contract PairbandLifecycleHookTest is Test {
         vm.expectRevert(); // WrappedError(HookCallFailed) around TradingDisabled
         swapRouter.swap(
             key,
-            IPoolManager.SwapParams({
+            SwapParams({
                 zeroForOne: zeroForOne,
                 amountSpecified: -int256(10_000),
                 sqrtPriceLimitX96: zeroForOne ? TickMath.MIN_SQRT_PRICE + 1 : TickMath.MAX_SQRT_PRICE - 1
@@ -385,7 +386,7 @@ contract PairbandLifecycleHookTest is Test {
         vm.expectRevert(); // WrappedError(HookCallFailed) around TradingDisabled
         swapRouter.swap(
             key,
-            IPoolManager.SwapParams({
+            SwapParams({
                 zeroForOne: zeroForOne,
                 amountSpecified: -int256(1_000),
                 sqrtPriceLimitX96: zeroForOne ? TickMath.MIN_SQRT_PRICE + 1 : TickMath.MAX_SQRT_PRICE - 1
