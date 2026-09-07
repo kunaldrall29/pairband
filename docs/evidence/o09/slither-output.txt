@@ -1,0 +1,119 @@
+'forge clean' running (wd: /workspace/packages/contracts)
+'forge config --json' running
+'forge build --build-info --deny never src' running (wd: /workspace/packages/contracts)
+INFO:Detectors:
+Detector: reentrancy-no-eth
+Reentrancy in PairbandRouter.buyExactOutput(bytes32,uint256,uint256,uint256) (src/PairbandRouter.sol#67-101):
+	External calls:
+	- result = poolManager.unlock(abi.encode(key)) (src/PairbandRouter.sol#96)
+	State variables written after the call(s):
+	- _clearContext() (src/PairbandRouter.sol#98)
+		- delete _ctx (src/PairbandRouter.sol#216)
+	PairbandRouter._ctx (src/PairbandRouter.sol#39) can be used in cross function reentrancies:
+	- PairbandRouter._clearContext() (src/PairbandRouter.sol#215-217)
+	- PairbandRouter._openContext(PairbandRouter.TradeContext) (src/PairbandRouter.sol#210-213)
+	- PairbandRouter.unlockCallback(bytes) (src/PairbandRouter.sol#140-194)
+Reentrancy in SeriesVault.redeem(uint256) (src/SeriesVault.sol#209-232):
+	External calls:
+	- writerReceipt.burn(msg.sender,q) (src/SeriesVault.sol#223)
+	State variables written after the call(s):
+	- accountedEURC6 -= eurc6 (src/SeriesVault.sol#226)
+	SeriesVault.accountedEURC6 (src/SeriesVault.sol#37) can be used in cross function reentrancies:
+	- SeriesVault.accountedEURC6 (src/SeriesVault.sol#37)
+	- SeriesVault.finalize() (src/SeriesVault.sol#189-197)
+	- SeriesVault.previewRedeem(uint256) (src/SeriesVault.sol#199-207)
+	- accountedUSDC6 -= usdc6 (src/SeriesVault.sol#225)
+	SeriesVault.accountedUSDC6 (src/SeriesVault.sol#36) can be used in cross function reentrancies:
+	- SeriesVault.accountedUSDC6 (src/SeriesVault.sol#36)
+	- SeriesVault.finalize() (src/SeriesVault.sol#189-197)
+	- SeriesVault.previewRedeem(uint256) (src/SeriesVault.sol#199-207)
+	- redeemedUnits += q (src/SeriesVault.sol#224)
+	SeriesVault.redeemedUnits (src/SeriesVault.sol#35) can be used in cross function reentrancies:
+	- SeriesVault.previewRedeem(uint256) (src/SeriesVault.sol#199-207)
+	- SeriesVault.redeemedUnits (src/SeriesVault.sol#35)
+Reentrancy in PairbandRouter.sellExactInput(bytes32,uint256,uint256,uint256) (src/PairbandRouter.sol#103-137):
+	External calls:
+	- result = poolManager.unlock(abi.encode(key)) (src/PairbandRouter.sol#132)
+	State variables written after the call(s):
+	- _clearContext() (src/PairbandRouter.sol#134)
+		- delete _ctx (src/PairbandRouter.sol#216)
+	PairbandRouter._ctx (src/PairbandRouter.sol#39) can be used in cross function reentrancies:
+	- PairbandRouter._clearContext() (src/PairbandRouter.sol#215-217)
+	- PairbandRouter._openContext(PairbandRouter.TradeContext) (src/PairbandRouter.sol#210-213)
+	- PairbandRouter.unlockCallback(bytes) (src/PairbandRouter.sol#140-194)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2
+INFO:Detectors:
+Detector: uninitialized-local
+SeriesVault.redeem(uint256).usdc6 (src/SeriesVault.sol#216) is a local variable never initialized
+SeriesVault.redeem(uint256).eurc6 (src/SeriesVault.sol#217) is a local variable never initialized
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-local-variables
+INFO:Detectors:
+Detector: unused-return
+MarketLauncher.registerAndInitialize(address,uint24,int24,uint160) (src/MarketLauncher.sol#37-46) ignores return value by poolManager.initialize(key,sqrtPriceX96) (src/MarketLauncher.sol#44)
+PairbandQuoter._quote(bytes32,uint256,bool) (src/PairbandQuoter.sol#56-75) ignores return value by (sid,vault,None,None,None,None,None,registered,initialized) = hook.markets(poolId) (src/PairbandQuoter.sol#60)
+PairbandQuoter._quote(bytes32,uint256,bool) (src/PairbandQuoter.sol#56-75) ignores return value by poolManager.unlock(abi.encode(key)) (src/PairbandQuoter.sol#74)
+PairbandQuoter.unlockCallback(bytes) (src/PairbandQuoter.sol#77-116) ignores return value by poolManager.swap(key,SwapParams({zeroForOne:zeroForOne,amountSpecified:amountSpecified,sqrtPriceLimitX96:limit}),) (src/PairbandQuoter.sol#95-99)
+PairbandRouter.unlockCallback(bytes) (src/PairbandRouter.sol#140-194) ignores return value by (seriesId,None,None,None,None,None,None,registered,initialized) = hook.markets(poolId) (src/PairbandRouter.sol#147)
+PairbandRouter.unlockCallback(bytes) (src/PairbandRouter.sol#140-194) ignores return value by poolManager.swap(key,SwapParams({zeroForOne:zeroForOne,amountSpecified:amountSpecified,sqrtPriceLimitX96:limit}),) (src/PairbandRouter.sol#162-166)
+PairbandRouter._loadMarket(bytes32) (src/PairbandRouter.sol#196-203) ignores return value by (sid,v,None,None,None,None,None,registered,initialized) = hook.markets(poolId) (src/PairbandRouter.sol#199)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+INFO:Detectors:
+Detector: reentrancy-benign
+Reentrancy in SeriesVault.cancel(uint256) (src/SeriesVault.sol#153-169):
+	External calls:
+	- longToken.burn(msg.sender,q) (src/SeriesVault.sol#162)
+	- writerReceipt.burn(msg.sender,q) (src/SeriesVault.sol#163)
+	State variables written after the call(s):
+	- accountedUSDC6 -= returnedUSDC6 (src/SeriesVault.sol#165)
+	- writerUnits -= q (src/SeriesVault.sol#164)
+Reentrancy in SeriesVault.exercise(uint256) (src/SeriesVault.sol#171-187):
+	External calls:
+	- longToken.burn(msg.sender,q) (src/SeriesVault.sol#180)
+	State variables written after the call(s):
+	- accountedEURC6 += eurcIn6 (src/SeriesVault.sol#183)
+	- accountedUSDC6 -= usdcOut6 (src/SeriesVault.sol#182)
+	- exercisedUnits += q (src/SeriesVault.sol#181)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+INFO:Detectors:
+Detector: reentrancy-events
+Reentrancy in PairbandRouter.buyExactOutput(bytes32,uint256,uint256,uint256) (src/PairbandRouter.sol#67-101):
+	External calls:
+	- result = poolManager.unlock(abi.encode(key)) (src/PairbandRouter.sol#96)
+	Event emitted after the call(s):
+	- Bought(seriesId,msg.sender,optionUnits,usdcPaid6,key.toId()) (src/PairbandRouter.sol#100)
+Reentrancy in MarketLauncher.registerAndInitialize(address,uint24,int24,uint160) (src/MarketLauncher.sol#37-46):
+	External calls:
+	- poolId = hook.registerMarket(vault,fee,tickSpacing,sqrtPriceX96,registry) (src/MarketLauncher.sol#42)
+	- poolManager.initialize(key,sqrtPriceX96) (src/MarketLauncher.sol#44)
+	Event emitted after the call(s):
+	- MarketLaunched(ISeriesVaultView(vault).seriesId(),poolId,sqrtPriceX96) (src/MarketLauncher.sol#45)
+Reentrancy in PairbandRouter.sellExactInput(bytes32,uint256,uint256,uint256) (src/PairbandRouter.sol#103-137):
+	External calls:
+	- result = poolManager.unlock(abi.encode(key)) (src/PairbandRouter.sol#132)
+	Event emitted after the call(s):
+	- Sold(seriesId,msg.sender,optionUnits,usdcReceived6,key.toId()) (src/PairbandRouter.sol#136)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-4
+INFO:Detectors:
+Detector: timestamp
+PairbandRouter.buyExactOutput(bytes32,uint256,uint256,uint256) (src/PairbandRouter.sol#67-101) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > deadline (src/PairbandRouter.sol#73)
+PairbandRouter.sellExactInput(bytes32,uint256,uint256,uint256) (src/PairbandRouter.sol#103-137) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > deadline (src/PairbandRouter.sol#109)
+SeriesVault.phase() (src/SeriesVault.sol#108-115) uses timestamp for comparisons
+	Dangerous comparisons:
+	- t < tradingStart (src/SeriesVault.sol#111)
+	- t < exerciseStart (src/SeriesVault.sol#112)
+	- t < exerciseEnd (src/SeriesVault.sol#113)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+Detector: cyclomatic-complexity
+PairbandRouter.unlockCallback(bytes) (src/PairbandRouter.sol#140-194) has a high cyclomatic complexity (15).
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#cyclomatic-complexity
+INFO:Detectors:
+Detector: low-level-calls
+Low level call in SeriesFactory._assertDecimals(address) (src/SeriesFactory.sol#130-134):
+	- (ok,data) = token.staticcall(abi.encodeWithSignature(decimals())) (src/SeriesFactory.sol#131)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Slither:src analyzed (48 contracts with 102 detectors), 22 result(s) found

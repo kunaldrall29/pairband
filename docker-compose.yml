@@ -1,0 +1,33 @@
+# Local development dependencies for Pairband options-v2.
+# Docker was NOT available in the O00 Cloud Agent environment — documented as a blocker
+# for local Postgres/Anvil bring-up there. On a Docker-capable host:
+#   docker compose up -d
+#   docker compose down
+#
+# Anvil is a local EVM mock. It is NOT Arc. Do not claim Arc integration from Anvil.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: pairband
+      POSTGRES_PASSWORD: pairband
+      POSTGRES_DB: pairband
+    volumes:
+      - pairband_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pairband -d pairband"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    entrypoint: ["anvil", "--host", "0.0.0.0", "--port", "8545"]
+    ports:
+      - "8545:8545"
+
+volumes:
+  pairband_pg:

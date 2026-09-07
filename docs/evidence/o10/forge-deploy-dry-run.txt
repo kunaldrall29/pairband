@@ -1,0 +1,25 @@
+Compiling 84 files with Solc 0.8.26
+Solc 0.8.26 finished in 11.21s
+Compiler run successful!
+Script ran successfully.
+Gas used: 96945
+
+== Logs ==
+  === Pairband DeployPairband ===
+  chainid 31337
+  deployer 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38
+  allowBroadcast false
+  USDC 0x3600000000000000000000000000000000000000
+  EURC 0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a
+  CREATE2 factory 0x4e59b44847b379578588920cA78FbF26c0B4956C
+  Permit2 0x000000000022D473030F116dDEE9F6B43aC78BA3
+  Multicall3From 0x522fAf9A91c41c443c66765030741e4AaCe147D0
+  hook flags 10368
+  DRY-RUN: no broadcast. Set PAIRBAND_ALLOW_BROADCAST=1 and forge --broadcast to deploy.
+  creationCode bytes PoolManager 17336
+  creationCode bytes Hook 5726
+  creationCode bytes Factory 15077
+  creationCode bytes Launcher 2687
+  creationCode bytes Router 5616
+  creationCode bytes Quoter 4658
+  POSM deferred: Arc has no WETH; see docs/evidence/o10/deployment-plan.md
