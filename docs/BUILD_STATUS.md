@@ -1,29 +1,26 @@
 # Build status
 
-Product: Pairband options-v2. Mode default: preview.
+Product: Pairband options-v2.
 
-| Stage | Status | Commit | Evidence | Blocker / next step |
-| --- | --- | --- | --- | --- |
-| O00 | complete | 0c99d7c | docs/evidence/o00/ | Next: O01 dependency/Arc/Uniswap preflight |
-| O01 | pending | — | — | Requires O00 evidence |
-| O02–O32 | pending | — | — | Follow docs/prompt-index.json |
+**Readiness labels (honest):** local vault lifecycle implemented ≠ audited ≠ Arc-verified ≠ mainnet-ready.
+
+| Stage | Status | Evidence | Blocker / next |
+| --- | --- | --- | --- |
+| O00 | complete | docs/evidence/o00/ | — |
+| O01 | complete | docs/evidence/o01/ | Official Uniswap v4 on Arc absent; Pairband-deployed testnet path planned |
+| O02 | complete | packages/domain + docs/evidence/o02/ | — |
+| O03 | complete (local) | packages/contracts + docs/evidence/o03/ | Arc deploy / explorer verify = O10 |
+| O04 | complete (local) | mint/cancel forge tests | Arc-specific token behavior = O10 |
+| O05 | complete (local) | exercise/redeem + dust forge tests | Independent review still required |
+| O06–O32 | pending | — | O06 lifecycle hook next |
+
+### Production / audit / mainnet
+
+| Claim | Status |
+| --- | --- |
+| Production-grade local vault economics | Core mint/cancel/exercise/redeem + dust/pause/donation tests pass locally |
+| Professional security audit | **Not done** — O28 prepares package; this agent cannot self-issue an audit |
+| Mainnet ready | **Blocked** — mainnet null; no official Uniswap Arc; Gates 4–5 unmet |
+| Funded pilot | **Blocked** on independent review, legal, maker liquidity |
 
 Optional O24/O25/O32: disabled.
-
-### O00 verification (executed)
-
-- `pnpm install` — success
-- `pnpm typecheck` — success (packages + apps)
-- `pnpm lint` — success
-- `pnpm test:fixtures` — 2,000 randomized allocation cases passed
-- `@pairband/config|domain|sdk|api|worker` unit tests — pass
-- `pnpm --filter @pairband/web build` — Next.js preview build success
-- Foundry/forge — **not installed** (blocker for O03+)
-- Docker — not required for O00 acceptance; compose file present
-- Arc RPC / official Uniswap Arc deployments — deferred to O01
-- Mainnet fields — null by design
-- Vercel — not linked (`.vercel/project.json` absent)
-
-### Labels
-
-Scaffold is **preview** only. Not audited. Not Arc-verified. Not deployment-ready.

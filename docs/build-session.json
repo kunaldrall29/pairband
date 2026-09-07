@@ -1,27 +1,27 @@
 {
   "schemaVersion": 2,
   "productVersion": "options-v2",
-  "repository": "https://github.com/kunaldrall29/pairband",
-  "currentStage": "O01",
+  "repository": "pairband",
+  "currentStage": "O06",
   "completedStages": [
-    "O00"
+    "O00",
+    "O01",
+    "O02",
+    "O03",
+    "O04",
+    "O05"
   ],
   "blockedStages": {
-    "O03": "Foundry/forge not installed in bootstrap environment",
-    "docker-local": "Docker CLI not available in Cloud Agent environment"
+    "mainnet": "Null until official Arc mainnet + Uniswap periphery verified",
+    "audit": "Requires independent external review (O28)",
+    "O06-official-uniswap-arc": "Official deployments absent"
   },
   "optionalStagesEnabled": [],
   "evidence": {
-    "O00": {
-      "inventory": "docs/evidence/o00/repository-inventory.md",
-      "adr": "docs/DECISIONS.md#adr-0001",
-      "localSetup": "docs/evidence/o00/local-setup.md",
-      "fixturesCheck": "passed",
-      "typecheck": "passed",
-      "webBuild": "passed",
-      "lint": "passed"
-    }
+    "O01": "docs/evidence/o01/",
+    "O02": "docs/evidence/o02/",
+    "O03-O05": "docs/evidence/o03/"
   },
-  "lastCommit": "b87a9f956233ed0dfcbe89d2af6267da1782df23",
-  "nextAction": "Execute O01 dependency, Arc and Uniswap compatibility preflight"
+  "lastCommit": null,
+  "nextAction": "O06 Uniswap v4 lifecycle hook with pinned core; Pairband-deployed testnet labeling. Do not claim audit/mainnet."
 }

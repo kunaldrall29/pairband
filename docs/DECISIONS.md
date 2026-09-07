@@ -11,3 +11,14 @@
 - **Migration consequences:** Old README product wording superseded; LICENSE retained. No deployed claim paths existed to preserve.
 - **Source/evidence:** docs/MASTER_CONTEXT.md, docs/reference/protocol.md, docs/evidence/o00/
 - **Unresolved review:** Official Uniswap v4 Arc deployments unverified; Foundry not yet installed; Arc RPC not yet queried (O01).
+
+## ADR-0002 — Production / audit / mainnet honesty bounds
+
+- **ID/date/owner:** ADR-0002 / 2026-09-07 / pairband-build
+- **Question:** Can this agent declare the product “production-level, security-audited, and mainnet-ready” in one pass?
+- **Existing constraint:** Release gates Gate0–Gate5; protocol forbids inventing audits, mainnet addresses, or official Uniswap Arc deployments.
+- **Options evaluated:** (a) claim readiness immediately; (b) implement maximal Gate1 code + audit package while keeping external gates explicit; (c) stop at preview.
+- **Decision:** (b). Build production-grade contracts/domain/tests and prepare independent-review artifacts. Do **not** claim a professional audit or mainnet release until: independent review closes critical/high findings; official Arc mainnet + Uniswap periphery (or reviewed self-deploy plan) are verified; legal/maker gates pass.
+- **Affected:** BUILD_STATUS labels, marketing copy, deployment manifests
+- **Source:** docs/reference/release-gates.md, O01 evidence (Uniswap Arc not listed)
+- **Unresolved:** External auditor engagement; official Uniswap on Arc; Arc mainnet config; maker capital; counsel sign-off

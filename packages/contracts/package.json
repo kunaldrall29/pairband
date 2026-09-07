@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "echo 'Foundry not installed in this environment; contract compile deferred to O03'",
-    "typecheck": "echo 'no TS in contracts scaffold'",
-    "lint": "echo 'solhint deferred'",
-    "test": "echo 'forge test deferred until Foundry install (blocker recorded in BUILD_STATUS)'"
+    "build": "forge build",
+    "test": "forge test",
+    "typecheck": "echo 'solc via forge'",
+    "lint": "echo deferred",
+    "prepare-libs": "bash scripts/install-libs.sh"
   }
 }
