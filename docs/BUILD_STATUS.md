@@ -26,7 +26,7 @@ Product: Pairband options-v2.
 | O21 | complete (preview/fixture UI) | docs/evidence/o21/ | Live exercise needs verified vault |
 | O20 | complete (preview/fixture UI) | docs/evidence/o20/ | Live depth needs indexed trades |
 | O19 | complete (preview/fixture UI) | docs/evidence/o19/ | Live mint needs verified vault |
-| O09–O10, O19–O32 | pending | — | Arc deploy O10; earn/markets next |
+| O09–O10, O22–O32 | pending | — | Arc deploy O10; advanced LP O22 |
 
 ### Production / audit / mainnet
 
