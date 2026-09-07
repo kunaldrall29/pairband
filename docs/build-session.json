@@ -22,6 +22,6 @@
       "lint": "passed"
     }
   },
-  "lastCommit": "91eac2519f5b8b1a4610fd0f9f632f40560ef040",
+  "lastCommit": "b87a9f956233ed0dfcbe89d2af6267da1782df23",
   "nextAction": "Execute O01 dependency, Arc and Uniswap compatibility preflight"
 }
