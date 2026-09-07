@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "productVersion": "options-v2",
   "repository": "pairband",
-  "currentStage": "O09",
+  "currentStage": "O10",
   "completedStages": [
     "O00",
     "O01",
@@ -12,7 +12,8 @@
     "O05",
     "O06",
     "O07",
-    "O08"
+    "O08",
+    "O09"
   ],
   "partialStages": {},
   "blockedStages": {
@@ -27,8 +28,9 @@
     "O03-O05": "docs/evidence/o03/",
     "O06": "docs/evidence/o06/",
     "O07": "docs/evidence/o07/",
-    "O08": "docs/evidence/o08/"
+    "O08": "docs/evidence/o08/",
+    "O09": "docs/evidence/o09/"
   },
-  "lastCommit": "pending",
-  "nextAction": "Execute O09 adversarial/invariant suite. Do not claim audit/mainnet/official Uniswap Arc."
+  "lastCommit": "7ff0088a02ec060230cb3e258ddc303b9e7bf1ba",
+  "nextAction": "Execute O10 Arc runtime / Multicall3From evidence. Do not claim audit/mainnet/official Uniswap Arc."
 }

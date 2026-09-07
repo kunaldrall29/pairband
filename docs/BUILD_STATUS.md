@@ -2,7 +2,7 @@
 
 Product: Pairband options-v2.
 
-**Readiness labels (honest):** local vault + hook + router + PositionManager NFT E2E ≠ audited ≠ Arc-verified ≠ mainnet-ready ≠ official Uniswap on Arc.
+**Readiness labels (honest):** local vault + hook + router + POSM NFT E2E + invariant/adversarial suite ≠ audited ≠ Arc-verified ≠ mainnet-ready ≠ official Uniswap on Arc.
 
 | Stage | Status | Evidence | Blocker / next |
 | --- | --- | --- | --- |
@@ -10,8 +10,9 @@ Product: Pairband options-v2.
 | O06 | complete (local) | docs/evidence/o06/ | Pairband-deployed fixture only |
 | O07 | complete (local) | docs/evidence/o07/ | — |
 | O08 | complete (local) | docs/evidence/o08/ | POSM NFT E2E local only |
-| O09 | pending | — | Adversarial/invariant suite |
-| O10–O32 | pending | — | After O09 |
+| O09 | complete (local) | docs/evidence/o09/ | Invariant/adversarial local; not audit |
+| O10 | pending | — | Arc runtime / Multicall3From suite |
+| O11–O32 | pending | — | After O10 gates as applicable |
 
 ### Production / audit / mainnet
 

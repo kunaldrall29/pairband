@@ -57,3 +57,11 @@
 - **Decision:** Use pinned Uniswap v4 `PositionManager` + Permit2 Action planner (`MINT_POSITION` / `DECREASE_LIQUIDITY` / zero-liq collect + `CLOSE_CURRENCY`). Do not invent pooled share accounting. Maker free inventory stays separate from vault `accountedUSDC`. Post-cutoff adds blocked by hook; decrease/collect remain allowed.
 - **Source/evidence:** docs/evidence/o08/, `PositionManagerE2E.t.sol`
 - **Unresolved:** Arc-deployed POSM address; official Uniswap listing
+
+## ADR-0007 — Independent ghost invariants (O09)
+
+- **ID/date/owner:** ADR-0007 / 2026-09-07 / pairband-build
+- **Question:** How to check vault conservation without trusting contract formulas alone?
+- **Decision:** Maintain a Solidity twin of the O02 `SeriesAccountingModel` as a ghost, drive multi-actor Foundry invariant sequences across two series, and keep a threat register with Slither triage. Donations tracked separately from accounted reserves. Green local suite is **not** an audit.
+- **Source/evidence:** docs/evidence/o09/
+- **Unresolved:** External review (O28); Arc-specific runtime (O10)
