@@ -42,6 +42,6 @@
     "O12": "docs/evidence/o12/",
     "O13-scaffold": "docs/evidence/o13/"
   },
-  "lastCommit": "7671154ee129afc7df3f7f54d5538327aa49ec49",
+  "lastCommit": "9fe3750",
   "nextAction": "Continue O13 quotes/prepare/OpenAPI against verified local/Anvil deploy; do not invent Arc series or premiums."
 }
