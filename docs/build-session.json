@@ -26,6 +26,6 @@
     "O06": "docs/evidence/o06/",
     "O07": "docs/evidence/o07/"
   },
-  "lastCommit": null,
+  "lastCommit": "f7ca9e58ee03569d52641caafbf46d2e19be3b04",
   "nextAction": "O08 LP PositionManager integration. Label Pairband-deployed instances honestly. Do not claim audit/mainnet."
 }
