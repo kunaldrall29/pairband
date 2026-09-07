@@ -42,7 +42,13 @@ export async function fetchSeriesList(): Promise<{
       };
     }
     const body = (await res.json()) as { series: SeriesCard[]; note?: string; source?: string };
-    return { ok: true, status: res.status, series: body.series ?? [], note: body.note ?? "", source: body.source };
+    return {
+      ok: true,
+      status: res.status,
+      series: body.series ?? [],
+      note: body.note ?? "",
+      ...(body.source !== undefined ? { source: body.source } : {}),
+    };
   } catch {
     return { ok: false, status: 0, series: [], note: "API unreachable" };
   }
