@@ -21,7 +21,8 @@
     "fastify": "5.5.0",
     "viem": "^2.56.3",
     "@pairband/indexer": "workspace:*",
-    "@pairband/sdk": "workspace:*"
+    "@pairband/sdk": "workspace:*",
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@types/node": "22.18.0",

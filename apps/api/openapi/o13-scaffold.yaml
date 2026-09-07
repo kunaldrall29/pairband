@@ -1,38 +1,8 @@
+# Deprecated hand stub — canonical OpenAPI is generated at runtime:
+# GET /v1/openapi.json from @pairband/sdk generateOpenApiDocument (same Zod schemas).
 openapi: 3.1.0
 info:
-  title: Pairband API (O13 scaffold)
-  version: 0.0.0-o13-scaffold
-  description: >
-    Scaffold only. Preview mode never returns executable financial transactions
-    or fabricated quotes. Fixture indexer series are labeled and not Arc live.
-paths:
-  /v1/indexer/status:
-    get:
-      summary: Indexer availability and labeled source
-      responses:
-        "200":
-          description: Status payload (fixture|anvil|disabled|arc-rpc notes)
-  /v1/series:
-    get:
-      summary: Series read model
-      responses:
-        "200":
-          description: Labeled fixture/anvil projections only
-        "503":
-          description: INDEXER_UNAVAILABLE when INDEXER_MODE disabled
-  /v1/quotes:
-    post:
-      summary: Quote request (scaffold)
-      responses:
-        "503":
-          description: UNVERIFIED in preview — no fabricated premiums
-        "501":
-          description: Simulation not yet wired for verified deploys
-  /v1/actions/prepare:
-    post:
-      summary: Prepare unsigned action (scaffold)
-      responses:
-        "503":
-          description: Blocked until verified deployment / router or vault target
-        "200":
-          description: Structural scaffold args only — not wallet-ready without simulation
+  title: Pairband API (see /v1/openapi.json)
+  version: 0.0.0-o13
+  description: Use GET /v1/openapi.json — do not maintain a second schema.
+paths: {}

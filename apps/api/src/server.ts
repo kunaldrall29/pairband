@@ -48,6 +48,16 @@ import {
   encodeVaultExercise,
   encodeVaultRedeem,
   encodeVaultFinalize,
+  QuoteRequestSchema,
+  PrepareRequestSchema,
+  TransactionIntentRequestSchema,
+  buildFixtureBuyQuote,
+  generateOpenApiDocument,
+  encodeBuyExactOutputCalldata,
+  encodeVaultCalldata,
+  assertBuyExactOutputSemantics,
+  assertVaultActionSemantics,
+  assertUnsignedTxShape,
   type DeploymentManifest,
 } from "@pairband/sdk";
 
@@ -390,162 +400,371 @@ export async function buildServer(env: Env, opts: BuildServerOptions = {}) {
     };
   });
 
-  /** O13 scaffold: quotes require verified deployment + simulation — never invent premiums. */
-  app.post("/v1/quotes", async (req, reply) => {
-    const deployment = loadPublicDeployment(env);
-    const body = (req.body ?? {}) as {
-      seriesId?: string;
-      side?: string;
-      optionUnits?: string;
-    };
-    if (!body.seriesId || !body.side || !body.optionUnits) {
-      return reply.code(400).send(
-        apiError("VALIDATION", "seriesId, side, optionUnits required", req.requestId).body,
-      );
-    }
-    if (env.PAIRBAND_MODE === "preview" || !deployment.verified) {
-      return reply.code(503).send(
-        apiError(
-          "UNVERIFIED",
-          "Quotes unavailable until a verified deployment and quoter simulation exist. No fabricated premiums.",
-          req.requestId,
-          { statusCode: 503, retryable: true },
-        ).body,
-      );
-    }
-    return reply.code(501).send(
-      apiError(
-        "NOT_IMPLEMENTED",
-        "Live quote simulation pending verified pool/router addresses (O13 continuation)",
-        req.requestId,
-        { statusCode: 501 },
-      ).body,
-    );
-  });
+  app.get("/v1/openapi.json", async () =>
+    generateOpenApiDocument({ serverUrl: env.API_ORIGIN, version: "0.0.0-o13" }),
+  );
 
-  /** O13 scaffold: prepare unsigned txs only when manifest allows. */
-  app.post("/v1/actions/prepare", async (req, reply) => {
-    const deployment = loadPublicDeployment(env);
-    const body = (req.body ?? {}) as {
-      action?: string;
-      seriesId?: string;
-      optionUnits?: string;
-      maxUSDC6?: string;
-      minUSDC6?: string;
-      deadline?: string;
-    };
-    if (!body.action || !body.seriesId) {
-      return reply.code(400).send(
-        apiError("VALIDATION", "action and seriesId required", req.requestId).body,
-      );
+  /** In-memory intent monitoring — never claims settlement. */
+  const intentStore = new Map<
+    string,
+    {
+      intentId: string;
+      clientIntentId: string;
+      account: string;
+      chainId: number;
+      action: string;
+      seriesId: string;
+      transactionHash: string;
+      status: "monitoring" | "confirmed" | "reverted" | "mismatch" | "unknown";
     }
-    const router =
-      (deployment.contracts.pairbandRouter as `0x${string}` | undefined) ??
-      (deployment.contracts.router as `0x${string}` | undefined) ??
-      null;
-    const manifest: DeploymentManifest = {
-      schemaVersion: 2,
-      mode: env.PAIRBAND_MODE,
-      verified: Boolean(deployment.verified),
-      chainId: deployment.chainId ?? null,
-      pairbandRouter: router,
-    };
-    try {
-      assertManifestAllowsActions(manifest);
-    } catch (e) {
-      return reply.code(503).send(
-        apiError("UNVERIFIED", (e as Error).message, req.requestId, {
-          statusCode: 503,
-          retryable: true,
-        }).body,
-      );
-    }
-    if (!manifest.pairbandRouter) {
-      return reply.code(503).send(
-        apiError("UNVERIFIED", "pairbandRouter missing from verified manifest", req.requestId, {
-          statusCode: 503,
-        }).body,
-      );
-    }
-    const units = BigInt(body.optionUnits ?? "0");
-    const deadline = BigInt(body.deadline ?? "0");
-    if (body.action === "buyExactOutput") {
-      const encoded = encodeBuyExactOutput({
-        seriesId: body.seriesId as `0x${string}`,
-        optionUnits: units,
-        maxUSDC6: BigInt(body.maxUSDC6 ?? "0"),
-        deadline,
-      });
-      return {
-        status: "scaffold",
-        note: "Calldata args validated structurally; full ABI encode + RPC simulation required before wallet review",
-        target: manifest.pairbandRouter,
-        chainId: manifest.chainId,
-        signature: encoded.signature,
-        args: encoded.args.map((a) => (typeof a === "bigint" ? a.toString() : a)),
-        requestId: req.requestId,
-      };
-    }
-    if (body.action === "sellExactInput") {
-      const encoded = encodeSellExactInput({
-        seriesId: body.seriesId as `0x${string}`,
-        optionUnits: units,
-        minUSDC6: BigInt(body.minUSDC6 ?? "0"),
-        deadline,
-      });
-      return {
-        status: "scaffold",
-        note: "Calldata args validated structurally; full ABI encode + RPC simulation required before wallet review",
-        target: manifest.pairbandRouter,
-        chainId: manifest.chainId,
-        signature: encoded.signature,
-        args: encoded.args.map((a) => (typeof a === "bigint" ? a.toString() : a)),
-        requestId: req.requestId,
-      };
-    }
-    const vaultActions = new Set(["mint", "cancel", "exercise", "redeem", "finalize"]);
-    if (vaultActions.has(body.action)) {
-      const vault =
-        (deployment.contracts.seriesVault as `0x${string}` | undefined) ??
-        (body as { vault?: string }).vault;
-      if (!vault || typeof vault !== "string" || !vault.startsWith("0x")) {
+  >();
+
+  app.post(
+    "/v1/quotes",
+    { config: { rateLimit: { max: 30, timeWindow: "1 minute" } } },
+    async (req, reply) => {
+      const parsed = QuoteRequestSchema.safeParse(req.body ?? {});
+      if (!parsed.success) {
+        return reply.code(400).send(
+          apiError("VALIDATION", parsed.error.message, req.requestId, {
+            statusCode: 400,
+            details: parsed.error.flatten(),
+          }).body,
+        );
+      }
+      const body = parsed.data;
+      const deployment = loadPublicDeployment(env);
+      const mode = resolveIndexerMode();
+
+      if (body.side === "sell") {
+        // Sell quotes need live inventory/simulation; do not invent bids.
+        if (env.PAIRBAND_MODE === "preview" || !deployment.verified) {
+          return reply.code(503).send(
+            apiError(
+              "UNVERIFIED",
+              "Sell quotes require verified deployment simulation. No fabricated bids.",
+              req.requestId,
+              { statusCode: 503, retryable: true },
+            ).body,
+          );
+        }
+        return reply.code(501).send(
+          apiError("NOT_IMPLEMENTED", "Live sell simulation pending", req.requestId, {
+            statusCode: 501,
+          }).body,
+        );
+      }
+
+      // Exact-output buy: fixture-labeled economics when INDEXER_MODE=fixture|anvil
+      if (mode === "fixture" || mode === "anvil") {
+        const quote = buildFixtureBuyQuote(body);
+        return reply.code(200).send({ ...quote, requestId: req.requestId });
+      }
+
+      if (env.PAIRBAND_MODE === "preview" || !deployment.verified) {
         return reply.code(503).send(
           apiError(
             "UNVERIFIED",
-            "Vault target required from verified manifest or explicit vault address",
+            "Quotes unavailable until verified deployment + quoter, or INDEXER_MODE=fixture for labeled local economics. No fabricated Arc premiums.",
             req.requestId,
-            { statusCode: 503 },
+            { statusCode: 503, retryable: true },
           ).body,
         );
       }
-      const units = BigInt(body.optionUnits ?? "0");
-      const encoded =
-        body.action === "mint"
-          ? encodeVaultMint(units)
-          : body.action === "cancel"
-            ? encodeVaultCancel(units)
-            : body.action === "exercise"
-              ? encodeVaultExercise(units)
-              : body.action === "redeem"
-                ? encodeVaultRedeem(units)
-                : encodeVaultFinalize();
-      return {
-        status: "scaffold",
-        note: "Vault action args validated structurally; full ABI encode + phase/allowance checks required before wallet review. Exercise does not require reference marks.",
-        target: vault,
-        chainId: manifest.chainId,
-        signature: encoded.signature,
-        args: encoded.args.map((a) => (typeof a === "bigint" ? a.toString() : a)),
-        requestId: req.requestId,
+      return reply.code(501).send(
+        apiError(
+          "NOT_IMPLEMENTED",
+          "Live quote simulation pending verified pool/router addresses",
+          req.requestId,
+          { statusCode: 501 },
+        ).body,
+      );
+    },
+  );
+
+  app.post(
+    "/v1/actions/prepare",
+    { config: { rateLimit: { max: 20, timeWindow: "1 minute" } } },
+    async (req, reply) => {
+      const parsed = PrepareRequestSchema.safeParse(req.body ?? {});
+      if (!parsed.success) {
+        return reply.code(400).send(
+          apiError("VALIDATION", parsed.error.message, req.requestId, {
+            statusCode: 400,
+            details: parsed.error.flatten(),
+          }).body,
+        );
+      }
+      const body = parsed.data;
+      const deployment = loadPublicDeployment(env);
+      const router =
+        (deployment.contracts.pairbandRouter as `0x${string}` | undefined) ??
+        (deployment.contracts.router as `0x${string}` | undefined) ??
+        null;
+      const manifest: DeploymentManifest = {
+        schemaVersion: 2,
+        mode: env.PAIRBAND_MODE,
+        verified: Boolean(deployment.verified),
+        chainId: deployment.chainId ?? null,
+        pairbandRouter: router,
       };
+
+      // Fixture quotes cannot prepare real transactions in preview.
+      if (env.PAIRBAND_MODE === "preview" || !deployment.verified) {
+        return reply.code(503).send(
+          apiError(
+            "UNVERIFIED",
+            "Action prepare blocked in preview / unverified deployment. Fixture quotes are review-only.",
+            req.requestId,
+            { statusCode: 503, retryable: true },
+          ).body,
+        );
+      }
+
+      try {
+        assertManifestAllowsActions(manifest);
+      } catch (e) {
+        return reply.code(503).send(
+          apiError("UNVERIFIED", (e as Error).message, req.requestId, {
+            statusCode: 503,
+            retryable: true,
+          }).body,
+        );
+      }
+
+      const units = BigInt(body.units ?? body.optionUnits ?? "0");
+      const deadline = BigInt(body.deadline ?? "0");
+
+      if (body.action === "buyExactOutput") {
+        if (!manifest.pairbandRouter || manifest.chainId == null) {
+          return reply.code(503).send(
+            apiError("UNVERIFIED", "pairbandRouter/chainId missing", req.requestId, {
+              statusCode: 503,
+            }).body,
+          );
+        }
+        const maxUSDC6 = BigInt(body.maxUSDC6 ?? "0");
+        const encoded = encodeBuyExactOutput({
+          seriesId: body.seriesId,
+          optionUnits: units,
+          maxUSDC6,
+          deadline,
+        });
+        const data = encodeBuyExactOutputCalldata({
+          seriesId: body.seriesId,
+          optionUnits: units,
+          maxUSDC6,
+          deadline,
+        });
+        const semantic = assertBuyExactOutputSemantics(data, {
+          seriesId: body.seriesId,
+          optionUnits: units,
+          maxUSDC6,
+          deadline,
+        });
+        const unsigned = {
+          chainId: manifest.chainId,
+          from: body.account,
+          to: manifest.pairbandRouter,
+          data,
+          value: "0" as const,
+          gasEstimateNative18: null,
+          maxFeePerGasNative18: null,
+          deadline: deadline.toString(),
+        };
+        const shape = assertUnsignedTxShape(unsigned, {
+          chainId: manifest.chainId,
+          from: body.account,
+          to: manifest.pairbandRouter,
+        });
+        if (semantic.length || shape.length) {
+          return reply.code(400).send(
+            apiError("VALIDATION", "Semantic transaction check failed", req.requestId, {
+              statusCode: 400,
+              details: [...semantic, ...shape],
+            }).body,
+          );
+        }
+        return {
+          status: "ready",
+          action: body.action,
+          chainId: manifest.chainId,
+          target: manifest.pairbandRouter,
+          signature: encoded.signature,
+          args: encoded.args.map((a) => (typeof a === "bigint" ? a.toString() : a)),
+          unsignedTransaction: unsigned,
+          requiredApprovals: [
+            {
+              token: "0x3600000000000000000000000000000000000000",
+              spender: manifest.pairbandRouter,
+              amount: maxUSDC6.toString(),
+            },
+          ],
+          simulation: "unavailable",
+          warningCodes: ["SIMULATION_PENDING"],
+          note: "Calldata decoded and semantically asserted; RPC simulation still required before wallet submit",
+          requestId: req.requestId,
+        };
+      }
+
+      if (body.action === "sellExactInput") {
+        if (!manifest.pairbandRouter || manifest.chainId == null) {
+          return reply.code(503).send(
+            apiError("UNVERIFIED", "pairbandRouter/chainId missing", req.requestId, {
+              statusCode: 503,
+            }).body,
+          );
+        }
+        const encoded = encodeSellExactInput({
+          seriesId: body.seriesId,
+          optionUnits: units,
+          minUSDC6: BigInt(body.minUSDC6 ?? "0"),
+          deadline,
+        });
+        return {
+          status: "scaffold",
+          action: body.action,
+          chainId: manifest.chainId,
+          target: manifest.pairbandRouter,
+          signature: encoded.signature,
+          args: encoded.args.map((a) => (typeof a === "bigint" ? a.toString() : a)),
+          unsignedTransaction: null,
+          requiredApprovals: [],
+          simulation: "unavailable",
+          warningCodes: ["SIMULATION_PENDING"],
+          note: "Sell prepare scaffold — full ABI encode pending verified route",
+          requestId: req.requestId,
+        };
+      }
+
+      const vaultActions = new Set(["mint", "cancel", "exercise", "redeem", "finalize"]);
+      if (vaultActions.has(body.action)) {
+        const vault =
+          (deployment.contracts.seriesVault as `0x${string}` | undefined) ?? body.vault ?? null;
+        if (!vault || manifest.chainId == null) {
+          return reply.code(503).send(
+            apiError("UNVERIFIED", "Vault target / chainId required", req.requestId, {
+              statusCode: 503,
+            }).body,
+          );
+        }
+        const action = body.action as "mint" | "cancel" | "exercise" | "redeem" | "finalize";
+        const encoded =
+          action === "mint"
+            ? encodeVaultMint(units)
+            : action === "cancel"
+              ? encodeVaultCancel(units)
+              : action === "exercise"
+                ? encodeVaultExercise(units)
+                : action === "redeem"
+                  ? encodeVaultRedeem(units)
+                  : encodeVaultFinalize();
+        const data = encodeVaultCalldata(action, action === "finalize" ? undefined : units);
+        const semantic = assertVaultActionSemantics(
+          data,
+          action,
+          action === "finalize" ? undefined : units,
+        );
+        if (semantic.length) {
+          return reply.code(400).send(
+            apiError("VALIDATION", "Semantic vault check failed", req.requestId, {
+              statusCode: 400,
+              details: semantic,
+            }).body,
+          );
+        }
+        const unsigned = {
+          chainId: manifest.chainId,
+          from: body.account,
+          to: vault,
+          data,
+          value: "0" as const,
+          gasEstimateNative18: null,
+          maxFeePerGasNative18: null,
+          deadline: null,
+        };
+        return {
+          status: "ready",
+          action: body.action,
+          chainId: manifest.chainId,
+          target: vault,
+          signature: encoded.signature,
+          args: encoded.args.map((a) => (typeof a === "bigint" ? a.toString() : a)),
+          preview: {
+            fee6: action === "mint" ? undefined : "0",
+          },
+          unsignedTransaction: unsigned,
+          requiredApprovals: [],
+          simulation: "unavailable",
+          warningCodes: action === "exercise" ? ["NO_REFERENCE_MARK_REQUIRED"] : [],
+          note: "Exercise does not require reference marks. RPC simulation pending.",
+          requestId: req.requestId,
+        };
+      }
+
+      return reply.code(400).send(
+        apiError(
+          "VALIDATION",
+          "Unsupported or incomplete LP action in this pass (lp_add|lp_decrease|lp_collect next)",
+          req.requestId,
+        ).body,
+      );
+    },
+  );
+
+  app.post("/v1/transaction-intents", async (req, reply) => {
+    const parsed = TransactionIntentRequestSchema.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      return reply.code(400).send(
+        apiError("VALIDATION", parsed.error.message, req.requestId, {
+          statusCode: 400,
+          details: parsed.error.flatten(),
+        }).body,
+      );
     }
-    return reply.code(400).send(
-      apiError(
-        "VALIDATION",
-        "Unsupported action (buyExactOutput|sellExactInput|mint|cancel|exercise|redeem|finalize)",
-        req.requestId,
-      ).body,
-    );
+    const body = parsed.data;
+    const key = `${body.account}:${body.clientIntentId}`;
+    const existing = intentStore.get(key);
+    if (existing) {
+      if (existing.transactionHash !== body.transactionHash) {
+        return reply.code(400).send(
+          apiError(
+            "MISMATCH",
+            "clientIntentId already registered with a different hash",
+            req.requestId,
+            { statusCode: 400 },
+          ).body,
+        );
+      }
+      return reply.code(202).send({
+        status: existing.status,
+        intentId: existing.intentId,
+        clientIntentId: existing.clientIntentId,
+        transactionHash: existing.transactionHash,
+        note: "Idempotent monitoring replay — not settlement",
+        requestId: req.requestId,
+      });
+    }
+    const intentId = `intent-${intentStore.size + 1}`;
+    const row = {
+      intentId,
+      clientIntentId: body.clientIntentId,
+      account: body.account,
+      chainId: body.chainId,
+      action: body.action,
+      seriesId: body.seriesId,
+      transactionHash: body.transactionHash,
+      status: "monitoring" as const,
+    };
+    intentStore.set(key, row);
+    return reply.code(202).send({
+      status: "monitoring",
+      intentId,
+      clientIntentId: body.clientIntentId,
+      transactionHash: body.transactionHash,
+      note: "Monitoring only — a submitted hash is not purchased coverage",
+      requestId: req.requestId,
+    });
   });
 
   app.get("/v1/reference-marks", async (req, reply) => {

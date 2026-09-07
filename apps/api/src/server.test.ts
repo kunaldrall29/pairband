@@ -168,9 +168,70 @@ test("auth nonce replay and CSRF on reminders", async () => {
   const quotesPreview = await app.inject({
     method: "POST",
     url: "/v1/quotes",
-    payload: { seriesId: `0x${"11".repeat(32)}`, side: "buy", optionUnits: "1000000" },
+    payload: {
+      seriesId: `0x${"11".repeat(32)}`,
+      side: "buy",
+      optionUnits: "100000000",
+      account: `0x${"55".repeat(20)}`,
+      slippageBps: 50,
+    },
   });
-  assert.equal(quotesPreview.statusCode, 503);
+  // INDEXER_MODE still fixture from above — labeled non-executable quote
+  assert.equal(quotesPreview.statusCode, 200);
+  const q = quotesPreview.json() as {
+    executable: boolean;
+    provenance: { source: string };
+    unsignedTransaction: null;
+  };
+  assert.equal(q.executable, false);
+  assert.equal(q.provenance.source, "fixture");
+  assert.equal(q.unsignedTransaction, null);
+
+  const openapi = await app.inject({ method: "GET", url: "/v1/openapi.json" });
+  assert.equal(openapi.statusCode, 200);
+  assert.equal((openapi.json() as { openapi: string }).openapi, "3.1.0");
+
+  const prepareBlocked = await app.inject({
+    method: "POST",
+    url: "/v1/actions/prepare",
+    payload: {
+      action: "buyExactOutput",
+      seriesId: `0x${"11".repeat(32)}`,
+      account: `0x${"55".repeat(20)}`,
+      optionUnits: "100000000",
+      maxUSDC6: "2010000",
+      deadline: "1700000000",
+    },
+  });
+  assert.equal(prepareBlocked.statusCode, 503);
+
+  const intent = await app.inject({
+    method: "POST",
+    url: "/v1/transaction-intents",
+    payload: {
+      clientIntentId: "c-test-1",
+      account: `0x${"55".repeat(20)}`,
+      chainId: 31337,
+      action: "buyExactOutput",
+      seriesId: `0x${"11".repeat(32)}`,
+      transactionHash: `0x${"ab".repeat(32)}`,
+    },
+  });
+  assert.equal(intent.statusCode, 202);
+  assert.equal((intent.json() as { status: string }).status, "monitoring");
+
+  process.env.INDEXER_MODE = "disabled";
+  const quotesDisabled = await app.inject({
+    method: "POST",
+    url: "/v1/quotes",
+    payload: {
+      seriesId: `0x${"11".repeat(32)}`,
+      side: "buy",
+      optionUnits: "100000000",
+      account: `0x${"55".repeat(20)}`,
+    },
+  });
+  assert.equal(quotesDisabled.statusCode, 503);
 
   if (prevIndexer === undefined) delete process.env.INDEXER_MODE;
   else process.env.INDEXER_MODE = prevIndexer;

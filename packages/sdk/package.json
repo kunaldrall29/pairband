@@ -16,10 +16,12 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src --max-warnings=0",
-    "test": "node --import tsx --test src/*.test.ts"
+    "test": "node --import tsx --test src/**/*.test.ts src/*.test.ts"
   },
   "dependencies": {
-    "@pairband/config": "workspace:*"
+    "@pairband/config": "workspace:*",
+    "zod": "3.25.76",
+    "viem": "^2.56.3"
   },
   "devDependencies": {
     "tsx": "4.20.5",

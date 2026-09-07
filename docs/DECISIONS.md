@@ -78,3 +78,11 @@
 - **Affected:** packages/indexer, apps/worker, apps/api `/v1/series`, `/v1/indexer/status`
 - **Source/evidence:** docs/evidence/o12/, docs/prompts/O12-*.md
 - **Unresolved:** Postgres projection upsert path under load; Arc O10 deployment for labeled arc-rpc reads
+
+## ADR-0007 — Fixture quotes review-only (O13/O18)
+
+- **ID/date/owner:** ADR-0007 / 2026-09-07 / pairband-build
+- **Question:** How to exercise Protect UX before Arc liquidity exists?
+- **Decision:** When `INDEXER_MODE=fixture|anvil`, return Zod-validated exact-output quotes with disclosed fixture premium (0.02 USDC/option), `executable:false`, and null unsigned tx. Prepare remains blocked in preview. UI Buy disabled; Submitted≠Purchased; no success timers.
+- **Affected:** `@pairband/sdk` schemas/openapi, `/v1/quotes`, `/protect`
+- **Unresolved:** Live quoter simulation against verified PairbandRouter
