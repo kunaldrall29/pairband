@@ -24,7 +24,9 @@ Evidence: `docs/evidence/o01/arc-rpc-preflight.json`
 | Official Arc PoolManager / periphery | **Not listed** on Uniswap v4 deployments page (2026-09-07) |
 | Permit2 at 0x0000…BA3 on Arc testnet | Bytecode present; not proof of official v4 stack |
 | Path forward | Pin upstream v4-core/periphery commits; deploy labeled **Pairband-deployed testnet instance** after license review (O06/O10) |
+| v4-core pin (O06) | `Uniswap/v4-core@v4.0.0` rev `e50237c43811bd9b526eff40f26772152a42daba` — local tests only |
 | Mainnet | null until official Arc support or separately reviewed plan |
+| Arc platform notes | Osaka EVM, 20 Gwei min base fee, dual USDC decimals, EIP-7708 system emitter — `arc-platform-notes.md` |
 
 ## Toolchain
 

@@ -3,8 +3,10 @@
 
 Checked 7 September 2026 unless a row says otherwise. Product design, quantities, economics, fees, release gates and UI copy are Pairband proposals, not claims that a third party has approved them. Reverify time-sensitive support before implementation.
 
-- [Circle use-arc skill](https://github.com/circlefin/skills/blob/master/plugins/circle/skills/use-arc/SKILL.md) — Read; older RPC examples differ from current connection page. Not proof of mainnet configuration.
+- [Circle use-arc skill](https://github.com/circlefin/skills/blob/master/plugins/circle/skills/use-arc/SKILL.md) — Read; RPC examples may cite `.arc.network`; prefer docs.arc.io `.arc.io`. Not proof of mainnet configuration.
+- [Arc Docs MCP](https://docs.arc.io/mcp) — Public, no auth; project config `.cursor/mcp.json`.
 - [Arc connection](https://docs.arc.io/arc/references/connect-to-arc) — Public testnet connection values; verify again at build.
+- [Arc platform notes (O01)](evidence/o01/arc-platform-notes.md) — Osaka EVM, 20 Gwei floor, dual USDC decimals, system emitter.
 - [Arc addresses](https://docs.arc.io/arc/references/contract-addresses) — Public page identifies addresses as testnet; runtime code checks still required.
 - [Arc EVM differences](https://docs.arc.io/arc/references/evm-differences.md) — Fetched canonical Markdown directly; local Anvil cannot establish Arc-specific behavior.
 - [Arc gas](https://docs.arc.io/arc/references/gas-and-fees.md) — Current testnet fee floor; do not project unchanged to mainnet.

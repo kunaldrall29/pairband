@@ -8,7 +8,18 @@
       "status": "verified-testnet",
       "evidence": [
         "docs/evidence/o01/arc-rpc-preflight.json",
+        "docs/evidence/o01/arc-platform-notes.md",
         "https://docs.arc.io/arc/references/connect-to-arc"
+      ],
+      "blocker": null
+    },
+    {
+      "name": "arc-docs-mcp",
+      "required": false,
+      "status": "configured",
+      "evidence": [
+        ".cursor/mcp.json",
+        "docs/evidence/o01/arc-platform-notes.md"
       ],
       "blocker": null
     },
@@ -17,34 +28,40 @@
       "required": true,
       "status": "verified-testnet",
       "evidence": [
-        "docs/evidence/o01/arc-rpc-preflight.json"
+        "docs/evidence/o01/arc-rpc-preflight.json",
+        "docs/evidence/o01/arc-platform-notes.md"
       ],
       "blocker": null
     },
     {
       "name": "uniswap-v4-core",
       "required": true,
-      "status": "blocked-official-arc-absent",
+      "status": "pinned-local-tests",
       "evidence": [
-        "docs/evidence/o01/uniswap-arc-decision.md"
+        "docs/evidence/o01/uniswap-arc-decision.md",
+        "docs/evidence/o06/verification.md",
+        "packages/contracts/foundry.lock"
       ],
-      "blocker": "No official Arc listing; Pairband-deployed testnet path planned"
+      "blocker": "Official Arc listing absent; local/Pairband-deployed testnet path only"
     },
     {
       "name": "uniswap-v4-periphery",
       "required": true,
       "status": "blocked-official-arc-absent",
       "evidence": [
-        "docs/evidence/o01/uniswap-arc-decision.md"
+        "docs/evidence/o01/uniswap-arc-decision.md",
+        "docs/evidence/o06/verification.md"
       ],
-      "blocker": "No official Arc listing; Pairband-deployed testnet path planned"
+      "blocker": "PositionManager seed deferred to O08; no official Arc periphery"
     },
     {
       "name": "circle-funding",
       "required": false,
       "status": "disabled",
-      "evidence": [],
-      "blocker": "Optional O24 not enabled"
+      "evidence": [
+        "docs/evidence/o01/arc-platform-notes.md"
+      ],
+      "blocker": "Optional O24 not enabled; App Kit does not swap option tokens"
     },
     {
       "name": "circle-wallets",
@@ -52,6 +69,15 @@
       "status": "disabled",
       "evidence": [],
       "blocker": "Optional O24 not enabled"
+    },
+    {
+      "name": "circle-app-kit",
+      "required": false,
+      "status": "disabled",
+      "evidence": [
+        "docs/evidence/o01/arc-platform-notes.md"
+      ],
+      "blocker": "Optional; Swap assets exclude Pairband option tokens"
     },
     {
       "name": "uniswap-trading-api",

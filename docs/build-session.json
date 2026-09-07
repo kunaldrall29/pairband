@@ -2,26 +2,28 @@
   "schemaVersion": 2,
   "productVersion": "options-v2",
   "repository": "pairband",
-  "currentStage": "O06",
+  "currentStage": "O07",
   "completedStages": [
     "O00",
     "O01",
     "O02",
     "O03",
     "O04",
-    "O05"
+    "O05",
+    "O06"
   ],
   "blockedStages": {
     "mainnet": "Null until official Arc mainnet + Uniswap periphery verified",
     "audit": "Requires independent external review (O28)",
-    "O06-official-uniswap-arc": "Official deployments absent"
+    "O06-official-uniswap-arc": "Official deployments absent; local Pairband-deployed fixture only"
   },
   "optionalStagesEnabled": [],
   "evidence": {
     "O01": "docs/evidence/o01/",
     "O02": "docs/evidence/o02/",
-    "O03-O05": "docs/evidence/o03/"
+    "O03-O05": "docs/evidence/o03/",
+    "O06": "docs/evidence/o06/"
   },
   "lastCommit": null,
-  "nextAction": "O06 Uniswap v4 lifecycle hook with pinned core; Pairband-deployed testnet labeling. Do not claim audit/mainnet."
+  "nextAction": "O07 narrow swap router with full-fill guarantees. Do not claim audit/mainnet/official Uniswap Arc."
 }

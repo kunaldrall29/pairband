@@ -22,3 +22,22 @@
 - **Affected:** BUILD_STATUS labels, marketing copy, deployment manifests
 - **Source:** docs/reference/release-gates.md, O01 evidence (Uniswap Arc not listed)
 - **Unresolved:** External auditor engagement; official Uniswap on Arc; Arc mainnet config; maker capital; counsel sign-off
+
+## ADR-0003 — Arc docs MCP + skill adoption (docs-only)
+
+- **ID/date/owner:** ADR-0003 / 2026-09-07 / pairband-build
+- **Question:** How should agents consume Arc documentation going forward?
+- **Existing constraint:** Funded-wallet core remains primary; O24 Circle funding/wallets disabled; App Kit must not be assumed to swap option tokens.
+- **Options evaluated:** (a) ignore skills/MCP; (b) project MCP + evidence notes, keep product gates; (c) enable App Kit/wallets as core.
+- **Decision:** (b). Add `.cursor/mcp.json` pointing at public `https://docs.arc.io/mcp` (no credentials). Prefer `https://rpc.testnet.arc.io` over skill examples citing `.arc.network`. Record Osaka EVM, 20 Gwei floor, dual USDC decimals, system emitter in `docs/evidence/o01/arc-platform-notes.md`. Do **not** enable Circle funding/wallets/swap as core path.
+- **Affected:** agent tooling, integrations.json optional statuses, O01 evidence
+- **Source/evidence:** docs.arc.io connect/evm/gas/addresses; Circle use-arc skill RPC discrepancy note
+- **Unresolved:** Live Arc MCP session may be unavailable in some agent sandboxes — WebFetch remains fallback
+
+## ADR-0004 — Pairband-deployed Uniswap v4 test instance (O06)
+
+- **ID/date/owner:** ADR-0004 / 2026-09-07 / pairband-build
+- **Question:** How to proceed without official Uniswap v4 on Arc?
+- **Decision:** Pin `Uniswap/v4-core@v4.0.0` for local Anvil tests; implement `PairbandLifecycleHook` + `MarketLauncher`. Label any future Arc deploy as **Pairband-deployed testnet instance**, never official Uniswap. Mainnet Uniswap fields remain null.
+- **Source/evidence:** docs/evidence/o01/uniswap-arc-decision.md, docs/evidence/o06/
+- **Unresolved:** Official Arc Uniswap listing; periphery PositionManager seed path (O08); Arc-specific callback/sender suite (O10)
