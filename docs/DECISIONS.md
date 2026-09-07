@@ -81,3 +81,11 @@
 - **Decision:** Publish an honest review bundle under `docs/review/` and `docs/evidence/o28/` with readiness ledger marking audit/mainnet/O10 broadcast as pending/blocked. Do **not** issue an audit badge. Treat O26/O27 as remaining prerequisites for full O28 acceptance. ETHGlobal README/FEEDBACK are stubs only.
 - **Source/evidence:** docs/review/, docs/evidence/o28/, docs/ethglobal/
 - **Unresolved:** External reviewer engagement; counsel; O10 broadcast; O26/O27
+
+## ADR-0010 — Dual-track status reporting (O30 docs)
+
+- **ID/date/owner:** ADR-0010 / 2026-09-07 / pairband-build
+- **Question:** How to report O13/O18 (api-ui) alongside O00–O10/O28 (bootstrap) without false merges?
+- **Decision:** BUILD_STATUS and build-session use explicit Track A/B tables and `parallelTrack` metadata. Completions on api-ui are cited as residing on that branch. ETHGlobal materials remain stubs under `docs/ethglobal/` with no submission claim.
+- **Source/evidence:** docs/BUILD_STATUS.md, docs/ethglobal/, docs/build-session.json
+- **Unresolved:** Branch merge strategy for a single demo tip; O10 broadcast; O30 authorization

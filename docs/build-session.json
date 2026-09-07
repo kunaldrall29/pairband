@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "productVersion": "options-v2",
   "repository": "pairband",
-  "currentStage": "O28",
+  "currentStage": "O30",
   "completedStages": [
     "O00",
     "O01",
@@ -16,15 +16,33 @@
     "O09"
   ],
   "partialStages": {
-    "O10": "Dry-run + read-only Arc preflight; broadcasts pending authorization",
-    "O28": "Review bundle/readiness ledger prepared; no external audit; O26/O27 prerequisites unmet"
+    "O10": "Dry-run + read-only Arc preflight on bootstrap; broadcasts pending authorization",
+    "O28": "Review bundle on bootstrap; no external audit; O26/O27 unmet",
+    "O30": "ETHGlobal stubs polished; not submitted; prerequisites O17/O19+ incomplete on this tip"
+  },
+  "parallelTrack": {
+    "branch": "cursor/api-ui-foundations-4c19",
+    "tipNote": "See that branch for O11\u2013O18 evidence; do not invent merge",
+    "recordedCompleteOnApiUi": [
+      "O11",
+      "O12",
+      "O13",
+      "O16",
+      "O17",
+      "O18"
+    ],
+    "recordedPartialOnApiUi": {
+      "O14": "Educational fixtures",
+      "O15": "Email disabled stub"
+    }
   },
   "blockedStages": {
     "mainnet": "Null until official Arc mainnet + Uniswap periphery verified",
-    "audit": "Requires independent external review \u2014 prep only at O28",
+    "audit": "Requires independent external review \u2014 O28 prep only",
     "O06-official-uniswap-arc": "Official deployments absent; Pairband-deployed path only",
     "O10-broadcast": "Managed deployer authorization + PAIRBAND_ALLOW_BROADCAST required",
-    "O28-gate4": "External reviewer + counsel + O26/O27 + O10 lifecycle evidence required"
+    "O28-gate4": "External reviewer + counsel + O26/O27 + O10 lifecycle evidence required",
+    "O30-submission": "Form/video/public-repo push require separate authorization; stubs are not submission"
   },
   "optionalStagesEnabled": [],
   "evidence": {
@@ -37,8 +55,10 @@
     "O09": "docs/evidence/o09/",
     "O10": "docs/evidence/o10/",
     "O28": "docs/evidence/o28/",
-    "review": "docs/review/"
+    "review": "docs/review/",
+    "O30-stubs": "docs/ethglobal/",
+    "O13-O18-api-ui": "docs/evidence/o13|o18 on cursor/api-ui-foundations-4c19 only"
   },
-  "lastCommit": "f786fe77431b132be63297557613c591e5b73e88",
-  "nextAction": "Do not badge audit. Engage external review only after re-freeze; continue O10 broadcast when authorized; O26/O27 for Gate3. O12 prep may proceed on fixtures."
+  "lastCommit": "4f65b9bda89e7b314c1388b2218ae92ca67a745d",
+  "nextAction": "Keep dual-track honesty. No audit badge. No O30 submission claim. O10 broadcast when authorized; O19+ on UI track as eligible."
 }

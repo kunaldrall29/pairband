@@ -1,25 +1,35 @@
 # Uniswap FEEDBACK.md (STUB)
 
-**Draft only. Form not submitted. Public repo publication not performed from this stage.**
+**Draft only. Developer feedback form not submitted. Public repo publication not claimed from this file.**
 
-## Integration observations (concrete)
+File intended for form “link to FEEDBACK.md” field once a public URL exists:  
+`docs/ethglobal/FEEDBACK.stub.md` (rename to `FEEDBACK.md` only when publishing).
 
-1. **Official v4 deployments absent on Arc** — forced Pairband-deployed `PoolManager` labeling; cannot claim Uniswap-operated infrastructure on Arc.
-2. **Hook permission mining** — CREATE2 flags `(beforeInitialize|beforeSwap|beforeAddLiquidity)` via `HookMiner`; verify address bits at deploy.
-3. **Narrow router vs Universal Router** — product uses `PairbandRouter` exact-out buy / exact-in sell with stored unlock payer context; Universal Router / Trading API not used for option tokens.
-4. **PositionManager on Arc** — periphery POSM expects WETH; Arc has no WETH (native USDC is IERC20). Local POSM E2E works; Arc POSM deferred pending stub/descriptor plan.
-5. **Quoter pattern** — `PairbandQuoter` returns via eth_call revert payload; not a price guarantee; resimulate before sign.
-6. **Lifecycle hook value** — enforces series registration, phase, and new-risk pause on init/swap/add without moving collateral; does **not** guarantee liquidity or fair premium.
+## What we built against Uniswap v4
 
-## Ask for Uniswap / docs teams (optional)
+- Lifecycle **hook** with mined CREATE2 permission bits for `beforeInitialize` / `beforeSwap` / `beforeAddLiquidity`.  
+- **Narrow router** (`buyExactOutput` / `sellExactInput`) with unlock-context payer binding — not Universal Router.  
+- Local **PositionManager** Action-planner E2E against the hook; Arc POSM deferred because Arc has **no WETH** (native USDC is already IERC20).  
+- Quoter via **eth_call revert payload** — resimulate before sign; not a price guarantee.
 
-- Guidance for chains without listed v4 deployments but with community self-deploy  
-- POSM patterns when native gas token is already ERC-20 (no WETH)
+## Integration friction (constructive)
 
-## Submission checklist (external actions)
+1. **No official v4 deployment listing on Arc** → self-deploy must be labeled; docs could clarify community-deploy expectations.  
+2. **POSM ↔ chains without WETH** → clearer periphery guidance when gas token is already ERC-20 would help.  
+3. **Hook + sparse liquidity** → exact-output full-fill UX needs explicit depth checks; partial fills correctly revert in our router.  
+4. **Multicall3From (Arc)** → sender preservation matters for router `msg.sender` payer binding; indexers must attribute EOAs through CallFrom routes.
 
-- [ ] Public open-source repo push (authorized)  
-- [ ] Paste this FEEDBACK into required form (authorized)  
-- [ ] Video / presentation upload (authorized)  
+## What we are not claiming
 
-Unchecked = not done.
+- Official Uniswap-operated pools on Arc  
+- Audit or mainnet readiness  
+- Graph/Circle optional tracks without separate evidence  
+- Form completion or prize eligibility
+
+## Submission checklist (external)
+
+- [ ] Publish open-source repo (authorized)  
+- [ ] Submit feedback form with this file’s URL (authorized)  
+- [ ] Attach demo video if required (authorized)  
+
+Unchecked items are **not done**.

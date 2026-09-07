@@ -1,49 +1,98 @@
-# Pairband options-v2 — ETHGlobal README (STUB)
+# Pairband options-v2 — ETHGlobal README (DRAFT STUB)
 
-**Status: draft stub. Not a submission. Not published as the contest README.**  
-Do not treat this file as form completion or video upload.
+**Status: draft for operators. Not a contest submission. Not published as the official hackathon README.**  
+Form completion, public push, and video upload are **separate authorized actions** — none are claimed here.
 
 ## One-liner
 
-Dated EURC put options on Arc: writers lock USDC backing; buyers trade option tokens on a Pairband-deployed Uniswap v4 test instance; physical exercise and writer redemption complete the lifecycle.
+Dated EURC put options on Arc: writers lock USDC backing; buyers trade option tokens against USDC on a **Pairband-deployed** Uniswap v4 test instance; physical exercise and writer redemption complete the lifecycle.
 
-## Honesty labels (must remain)
+## Honesty labels (required in any public copy)
 
-- Not audited  
-- Official Uniswap v4 **not listed** on Arc — any manager is **Pairband-deployed**  
-- Arc contract addresses: **pending broadcast** (see `deployments/arc-testnet.json`, `verified: false`)  
-- Local Anvil ≠ Arc Osaka  
+| Label | Fact |
+| --- | --- |
+| Audit | **Not audited** — O28 is prep docs only |
+| Uniswap on Arc | Official v4 **not listed** — PoolManager must be labeled Pairband-deployed |
+| Arc deploy | `deployments/arc-testnet.json` → `verified: false`; contracts null until broadcast |
+| Local ≠ Arc | Foundry `cancun` ≠ Arc Osaka |
+| Quotes / UI | Fixture/preview paths use `executable: false` (api-ui O13/O18) |
+| Prizes / tracks | **No prize or track selection claimed** |
 
-## Setup (local)
+## Product story (what exists)
+
+1. **Writer** mints: locks `q × strike` USDC; receives long + writer receipt.  
+2. **Maker** supplies separate free USDC/longs to a v4 pool (POSM locally; Arc POSM deferred — no WETH).  
+3. **Buyer** `buyExactOutput` via `PairbandRouter` (full fill or revert).  
+4. After `exerciseStart`: swaps/adds blocked; LP decrease/collect still allowed.  
+5. **Exercise**: burn longs, deliver EURC, receive USDC.  
+6. After `exerciseEnd`: writer **redeem** mixed reserves.
+
+Hook lifecycle gates registration/phase/pause — it does **not** guarantee price, depth, or distribution.
+
+## Dual-track code
+
+| Track | Branch (examples) | What judges should look at |
+| --- | --- | --- |
+| Protocol | `cursor/options-v2-bootstrap-4c19` | Contracts O00–O09, O10 dry-run, O28 review docs |
+| App | `cursor/api-ui-foundations-4c19` | API/UI O11–O18 (fixture quotes / protect flow) |
+
+Merge state may lag; cite evidence paths, not aspirational completeness.
+
+## Setup (local reproduce)
 
 ```bash
+# Node workspace
 pnpm install
 pnpm --filter @pairband/domain test
-cd packages/contracts && forge test
+pnpm --filter @pairband/sdk test   # if present on tip
+
+# Contracts (protocol tip)
+cd packages/contracts
+forge test
+# Optional dry-run deploy script (no broadcast):
+forge script script/DeployPairband.s.sol:DeployPairband -vvv
 ```
 
-Env: copy `.env.example`. Keep `PAIRBAND_MODE=preview` until a verified manifest exists.  
-**Never** set `PAIRBAND_ALLOW_BROADCAST=1` without operator authorization.
+Copy `.env.example` → `.env`. Keep `PAIRBAND_MODE=preview` and `PAIRBAND_ALLOW_BROADCAST=0` unless an operator explicitly authorizes otherwise.
+
+Pinned toolchain (protocol): solc **0.8.26**, via_ir, optimizer 200; v4-core `59d3ecf5…`, v4-periphery `dce236d4…`.
 
 ## Architecture
 
-See `docs/review/architecture-map.md`.
+See [architecture.md](./architecture.md) and `docs/review/architecture-map.md`.
 
-## Demo storyboard (when Arc receipts exist)
+## Demo / video
 
-1. Writer mints backed options (show vault USDC + dual claims)  
-2. Separate maker LP inventory  
-3. `buyExactOutput` full fill  
-4. Trading cutoff blocks swap/add; LP can still decrease  
-5. Exercise with EURC in window  
-6. Writer redeem after maturity  
+See [demo-checklist.md](./demo-checklist.md). Prefer **local forge** or labeled fixtures until Arc receipts exist. No fabricated FX crash or invented tx hashes.
 
-Until O10 broadcast: demo from **local forge** / recorded fixtures only — label clearly.
+## Contract paths (protocol tip)
 
-## AI assistance
+- `packages/contracts/src/SeriesVault.sol`  
+- `packages/contracts/src/SeriesFactory.sol`  
+- `packages/contracts/src/hooks/PairbandLifecycleHook.sol`  
+- `packages/contracts/src/MarketLauncher.sol`  
+- `packages/contracts/src/PairbandRouter.sol`  
+- `packages/contracts/src/PairbandQuoter.sol`  
 
-Built with AI coding agents; humans remain responsible for review and submission accuracy.
+## Recovery / failures
+
+- Preview/unverified manifest → financial prepare blocked.  
+- Stale deadline / partial fill → router reverts.  
+- New-risk pause → mint/swap/add blocked; cancel/exercise/redeem/LP exit remain.  
+- Failed broadcast → do not retry economic actions blindly; reconcile receipts (O10 notes).
+
+## AI assistance disclosure
+
+Built with AI coding agents; humans own review, submission accuracy, and any public claims.
 
 ## Known limitations
 
-See `docs/review/known-limitations.md`.
+`docs/review/known-limitations.md`.
+
+## Uniswap feedback
+
+Draft: [FEEDBACK.stub.md](./FEEDBACK.stub.md) — **not submitted**.
+
+## Evidence map
+
+[evidence-map.md](./evidence-map.md).
