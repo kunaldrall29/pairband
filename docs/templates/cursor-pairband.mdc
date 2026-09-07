@@ -1,0 +1,9 @@
+
+---
+description: Pairband options-v2 protocol and implementation rules
+alwaysApply: true
+---
+Read AGENTS.md and docs/MASTER_CONTEXT.md. Load the requested O-stage and its direct prerequisites. Follow the exact 6-decimal option-unit model, separate collateral/LP assets, chain-time lifecycle, authenticated v4 callbacks and verified Arc configuration. Do not build the old payment-flow product. Update evidence and build status; never claim mocked values are live. Preserve user changes. External deployments/messages/publications require applicable authorization. For changed economic rules, write an ADR and update shared fixtures before implementation.
+
+
+---

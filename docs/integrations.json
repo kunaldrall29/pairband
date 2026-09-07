@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 2,
+  "reviewedAt": "2026-09-07",
+  "integrations": [
+    {
+      "name": "arc",
+      "required": true,
+      "status": "verified-testnet",
+      "evidence": [
+        "docs/evidence/o01/arc-rpc-preflight.json",
+        "https://docs.arc.io/arc/references/connect-to-arc"
+      ],
+      "blocker": null
+    },
+    {
+      "name": "usdc-eurc",
+      "required": true,
+      "status": "verified-testnet",
+      "evidence": [
+        "docs/evidence/o01/arc-rpc-preflight.json"
+      ],
+      "blocker": null
+    },
+    {
+      "name": "uniswap-v4-core",
+      "required": true,
+      "status": "blocked-official-arc-absent",
+      "evidence": [
+        "docs/evidence/o01/uniswap-arc-decision.md"
+      ],
+      "blocker": "No official Arc listing; Pairband-deployed testnet path planned"
+    },
+    {
+      "name": "uniswap-v4-periphery",
+      "required": true,
+      "status": "blocked-official-arc-absent",
+      "evidence": [
+        "docs/evidence/o01/uniswap-arc-decision.md"
+      ],
+      "blocker": "No official Arc listing; Pairband-deployed testnet path planned"
+    },
+    {
+      "name": "circle-funding",
+      "required": false,
+      "status": "disabled",
+      "evidence": [],
+      "blocker": "Optional O24 not enabled"
+    },
+    {
+      "name": "circle-wallets",
+      "required": false,
+      "status": "disabled",
+      "evidence": [],
+      "blocker": "Optional O24 not enabled"
+    },
+    {
+      "name": "uniswap-trading-api",
+      "required": false,
+      "status": "disabled",
+      "evidence": [],
+      "blocker": "Option token routing unverified"
+    },
+    {
+      "name": "graph",
+      "required": false,
+      "status": "disabled",
+      "evidence": [],
+      "blocker": "Optional O25 not enabled"
+    },
+    {
+      "name": "email",
+      "required": false,
+      "status": "disabled",
+      "evidence": [],
+      "blocker": "Provider not configured"
+    }
+  ]
+}

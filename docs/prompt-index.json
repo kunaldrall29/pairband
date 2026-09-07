@@ -1,0 +1,380 @@
+{
+  "version": 2,
+  "product": "Pairband FX options",
+  "stages": [
+    {
+      "id": "O00",
+      "title": "Repository bootstrap and migration",
+      "file": "prompts/O00-repository-bootstrap-and-migration.md",
+      "prerequisites": [],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O01",
+      "title": "Dependency, Arc and Uniswap compatibility preflight",
+      "file": "prompts/O01-dependency-arc-and-uniswap-compatibility-preflight.md",
+      "prerequisites": [
+        "O00"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O02",
+      "title": "Integer domain model, phases and payoff mathematics",
+      "file": "prompts/O02-integer-domain-model-phases-and-payoff-mathematics.md",
+      "prerequisites": [
+        "O00",
+        "O01"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O03",
+      "title": "Series factory, immutable terms and claim tokens",
+      "file": "prompts/O03-series-factory-immutable-terms-and-claim-tokens.md",
+      "prerequisites": [
+        "O02"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O04",
+      "title": "Collateral minting and matched cancellation",
+      "file": "prompts/O04-collateral-minting-and-matched-cancellation.md",
+      "prerequisites": [
+        "O03"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O05",
+      "title": "Physical exercise and matured writer claims",
+      "file": "prompts/O05-physical-exercise-and-matured-writer-claims.md",
+      "prerequisites": [
+        "O04"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O06",
+      "title": "Uniswap v4 series lifecycle hook and market registration",
+      "file": "prompts/O06-uniswap-v4-series-lifecycle-hook-and-market-registration.md",
+      "prerequisites": [
+        "O01",
+        "O03",
+        "O05"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O07",
+      "title": "Narrow swap router, quotes and full-fill guarantees",
+      "file": "prompts/O07-narrow-swap-router-quotes-and-full-fill-guarantees.md",
+      "prerequisites": [
+        "O02",
+        "O06"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O08",
+      "title": "LP PositionManager integration and expiry exits",
+      "file": "prompts/O08-lp-positionmanager-integration-and-expiry-exits.md",
+      "prerequisites": [
+        "O07"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O09",
+      "title": "Adversarial contract and economic invariant suite",
+      "file": "prompts/O09-adversarial-contract-and-economic-invariant-suite.md",
+      "prerequisites": [
+        "O05",
+        "O06",
+        "O07",
+        "O08"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O10",
+      "title": "Arc testnet deployment and real lifecycle evidence",
+      "file": "prompts/O10-arc-testnet-deployment-and-real-lifecycle-evidence.md",
+      "prerequisites": [
+        "O09"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O11",
+      "title": "Database, API foundation and private preferences",
+      "file": "prompts/O11-database-api-foundation-and-private-preferences.md",
+      "prerequisites": [
+        "O00",
+        "O02"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O12",
+      "title": "Canonical RPC indexer and reserve reconciliation",
+      "file": "prompts/O12-canonical-rpc-indexer-and-reserve-reconciliation.md",
+      "prerequisites": [
+        "O05",
+        "O06",
+        "O08",
+        "O11"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O13",
+      "title": "Quote and unsigned transaction API",
+      "file": "prompts/O13-quote-and-unsigned-transaction-api.md",
+      "prerequisites": [
+        "O07",
+        "O11",
+        "O12"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O14",
+      "title": "Payoff analytics, reference marks and honest portfolio values",
+      "file": "prompts/O14-payoff-analytics-reference-marks-and-honest-portfolio-values.md",
+      "prerequisites": [
+        "O02",
+        "O12"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O15",
+      "title": "Durable workers and exercise reminders",
+      "file": "prompts/O15-durable-workers-and-exercise-reminders.md",
+      "prerequisites": [
+        "O11",
+        "O12"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O16",
+      "title": "Shared design system, app shell and wallet states",
+      "file": "prompts/O16-shared-design-system-app-shell-and-wallet-states.md",
+      "prerequisites": [
+        "O00",
+        "O02"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O17",
+      "title": "Updated landing page with real early access",
+      "file": "prompts/O17-updated-landing-page-with-real-early-access.md",
+      "prerequisites": [
+        "O11",
+        "O14",
+        "O16"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O18",
+      "title": "Protect purchase flow",
+      "file": "prompts/O18-protect-purchase-flow.md",
+      "prerequisites": [
+        "O13",
+        "O16"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O19",
+      "title": "Earn mint-and-sell writer journey",
+      "file": "prompts/O19-earn-mint-and-sell-writer-journey.md",
+      "prerequisites": [
+        "O04",
+        "O18"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O20",
+      "title": "Markets, option trading and terms",
+      "file": "prompts/O20-markets-option-trading-and-terms.md",
+      "prerequisites": [
+        "O14",
+        "O18"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O21",
+      "title": "Portfolio, exercise, cancellation and writer redemption",
+      "file": "prompts/O21-portfolio-exercise-cancellation-and-writer-redemption.md",
+      "prerequisites": [
+        "O05",
+        "O15",
+        "O18"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O22",
+      "title": "Advanced LP interface and expiring inventory",
+      "file": "prompts/O22-advanced-lp-interface-and-expiring-inventory.md",
+      "prerequisites": [
+        "O08",
+        "O20",
+        "O21"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O23",
+      "title": "Activity, exports and financial observability",
+      "file": "prompts/O23-activity-exports-and-financial-observability.md",
+      "prerequisites": [
+        "O12",
+        "O16",
+        "O21"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O24",
+      "title": "Optional Circle funding and user-controlled onboarding",
+      "file": "prompts/O24-optional-circle-funding-and-user-controlled-onboarding.md",
+      "prerequisites": [
+        "O01",
+        "O18"
+      ],
+      "optional": true,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O25",
+      "title": "Optional live Graph data and qualifying analytics",
+      "file": "prompts/O25-optional-live-graph-data-and-qualifying-analytics.md",
+      "prerequisites": [
+        "O01",
+        "O12"
+      ],
+      "optional": true,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O26",
+      "title": "Integrated end-to-end and accessibility verification",
+      "file": "prompts/O26-integrated-end-to-end-and-accessibility-verification.md",
+      "prerequisites": [
+        "O10",
+        "O17",
+        "O19",
+        "O20",
+        "O21",
+        "O22",
+        "O23"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O27",
+      "title": "Liquidity, pricing and product economics validation",
+      "file": "prompts/O27-liquidity-pricing-and-product-economics-validation.md",
+      "prerequisites": [
+        "O09",
+        "O14",
+        "O26"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O28",
+      "title": "Independent review preparation and funded-pilot gates",
+      "file": "prompts/O28-independent-review-preparation-and-funded-pilot-gates.md",
+      "prerequisites": [
+        "O09",
+        "O26",
+        "O27"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O29",
+      "title": "Deployment, monitoring, backups and conditional mainnet release",
+      "file": "prompts/O29-deployment-monitoring-backups-and-conditional-mainnet-release.md",
+      "prerequisites": [
+        "O28"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O30",
+      "title": "ETHGlobal documentation and product demonstration",
+      "file": "prompts/O30-ethglobal-documentation-and-product-demonstration.md",
+      "prerequisites": [
+        "O10",
+        "O17",
+        "O19",
+        "O20",
+        "O21",
+        "O23",
+        "O26"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O31",
+      "title": "Company, pilot distribution and investor/grant materials",
+      "file": "prompts/O31-company-pilot-distribution-and-investor-grant-materials.md",
+      "prerequisites": [
+        "O27"
+      ],
+      "optional": false,
+      "status": "not_implemented_by_this_documentation_pack"
+    },
+    {
+      "id": "O32",
+      "title": "Optional future-product expansion design",
+      "file": "prompts/O32-optional-future-product-expansion-design.md",
+      "prerequisites": [
+        "O28",
+        "O31"
+      ],
+      "optional": true,
+      "status": "not_implemented_by_this_documentation_pack"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "productVersion": "options-v2",
+  "repository": null,
+  "currentStage": "O00",
+  "completedStages": [],
+  "blockedStages": {},
+  "optionalStagesEnabled": [],
+  "evidence": {},
+  "lastCommit": null,
+  "nextAction": "Read START_HERE and inspect the actual repository."
+}

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 2,
+  "mode": "testnet",
+  "verified": false,
+  "chainId": 5042002,
+  "rpcUrl": "https://rpc.testnet.arc.io",
+  "explorerUrl": "https://testnet.arcscan.app",
+  "tokens": {
+    "usdc": {
+      "address": "0x3600000000000000000000000000000000000000",
+      "decimals": 6,
+      "verified": false
+    },
+    "eurc": {
+      "address": "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a",
+      "decimals": 6,
+      "verified": false
+    }
+  },
+  "contracts": {
+    "seriesFactory": null,
+    "registry": null,
+    "lifecycleHook": null,
+    "router": null,
+    "poolManager": null,
+    "positionManager": null,
+    "quoter": null,
+    "stateView": null,
+    "permit2": null,
+    "marketLauncher": null
+  },
+  "deploymentProvenance": null,
+  "gitCommit": null,
+  "compiler": null,
+  "evmTarget": null,
+  "dependencyCommits": {},
+  "codeHashes": {},
+  "deployTransactions": {},
+  "series": [],
+  "releaseGates": {
+    "securityReview": false,
+    "legalReview": false,
+    "makerReadiness": false,
+    "operationalReadiness": false
+  }
+}

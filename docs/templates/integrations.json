@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 2,
+  "reviewedAt": "2026-09-07",
+  "integrations": [
+    {
+      "name": "arc",
+      "required": true,
+      "status": "unverified",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "name": "usdc-eurc",
+      "required": true,
+      "status": "unverified",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "name": "uniswap-v4-core",
+      "required": true,
+      "status": "unverified",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "name": "uniswap-v4-periphery",
+      "required": true,
+      "status": "unverified",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "name": "circle-funding",
+      "required": false,
+      "status": "unverified",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "name": "circle-wallets",
+      "required": false,
+      "status": "unverified",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "name": "uniswap-trading-api",
+      "required": false,
+      "status": "unverified",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "name": "graph",
+      "required": false,
+      "status": "unverified",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "name": "email",
+      "required": false,
+      "status": "unverified",
+      "evidence": [],
+      "blocker": null
+    }
+  ]
+}
