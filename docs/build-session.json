@@ -21,6 +21,6 @@
       "webBuild": "passed"
     }
   },
-  "lastCommit": null,
+  "lastCommit": "0c99d7c5f74e170d6fc0a02e091f4281cb23a85a",
   "nextAction": "Execute O01 dependency, Arc and Uniswap compatibility preflight"
 }

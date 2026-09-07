@@ -4,7 +4,7 @@ Product: Pairband options-v2. Mode default: preview.
 
 | Stage | Status | Commit | Evidence | Blocker / next step |
 | --- | --- | --- | --- | --- |
-| O00 | complete | (this commit) | docs/evidence/o00/ | Next: O01 dependency/Arc/Uniswap preflight |
+| O00 | complete | 0c99d7c | docs/evidence/o00/ | Next: O01 dependency/Arc/Uniswap preflight |
 | O01 | pending | — | — | Requires O00 evidence |
 | O02–O32 | pending | — | — | Follow docs/prompt-index.json |
 
