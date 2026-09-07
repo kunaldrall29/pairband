@@ -1,0 +1,145 @@
+{
+  "version": 2,
+  "units": {
+    "optionDecimals": 6,
+    "receiptDecimals": 6,
+    "underlyingDecimals": 6,
+    "settlementDecimals": 6,
+    "underlyingPerUnit6": "100",
+    "strikePerUnit6": "110"
+  },
+  "largeExample": {
+    "optionUnits": "100000000",
+    "wholeOptions": "100",
+    "eurcDelivery6": "10000000000",
+    "usdcBacking6": "11000000000",
+    "illustrativePremium6": "200000000"
+  },
+  "partialExercise": {
+    "mintUnits": "1000000",
+    "exerciseUnits": "400000",
+    "remainingUSDC6": "66000000",
+    "deliveredEURC6": "40000000",
+    "writerClaims": [
+      {
+        "units": "250000",
+        "usdc6": "16500000",
+        "eurc6": "10000000"
+      },
+      {
+        "units": "750000",
+        "usdc6": "49500000",
+        "eurc6": "30000000"
+      }
+    ]
+  },
+  "dustExample": {
+    "mintUnits": "3",
+    "exerciseUnits": "1",
+    "snapshotUSDC6": "220",
+    "snapshotEURC6": "100",
+    "claims": [
+      {
+        "units": "1",
+        "usdc6": "73",
+        "eurc6": "33"
+      },
+      {
+        "units": "1",
+        "usdc6": "73",
+        "eurc6": "33"
+      },
+      {
+        "units": "1",
+        "usdc6": "74",
+        "eurc6": "34"
+      }
+    ]
+  },
+  "nonzeroFeeFixture": {
+    "optionUnits": "1000000",
+    "feeBps": 10,
+    "backing6": "110000000",
+    "fee6": "110000",
+    "totalDebitBeforeGas6": "110110000"
+  },
+  "phaseBoundaries": {
+    "tradingStart": 1000,
+    "exerciseStart": 2000,
+    "exerciseEnd": 3000,
+    "expected": {
+      "999": "scheduled",
+      "1000": "trading",
+      "1999": "trading",
+      "2000": "exercise",
+      "2999": "exercise",
+      "3000": "matured"
+    }
+  },
+  "payoffs": [
+    {
+      "spot": "1.00",
+      "unprotectedUSDC": "10000",
+      "protectedAfterPremiumUSDC": "10800",
+      "longOnlyPnLUSDC": "800",
+      "writerPnLUSDC": "-800"
+    },
+    {
+      "spot": "1.10",
+      "unprotectedUSDC": "11000",
+      "protectedAfterPremiumUSDC": "10800",
+      "longOnlyPnLUSDC": "-200",
+      "writerPnLUSDC": "200"
+    },
+    {
+      "spot": "1.20",
+      "unprotectedUSDC": "12000",
+      "protectedAfterPremiumUSDC": "11800",
+      "longOnlyPnLUSDC": "-200",
+      "writerPnLUSDC": "200"
+    }
+  ],
+  "distributedRoundingExample": {
+    "mintUnits": "7",
+    "exerciseUnits": "2",
+    "snapshotUSDC6": "550",
+    "snapshotEURC6": "200",
+    "claims": [
+      {
+        "units": "1",
+        "usdc6": "78",
+        "eurc6": "28"
+      },
+      {
+        "units": "1",
+        "usdc6": "79",
+        "eurc6": "29"
+      },
+      {
+        "units": "1",
+        "usdc6": "78",
+        "eurc6": "28"
+      },
+      {
+        "units": "1",
+        "usdc6": "79",
+        "eurc6": "29"
+      },
+      {
+        "units": "1",
+        "usdc6": "78",
+        "eurc6": "28"
+      },
+      {
+        "units": "1",
+        "usdc6": "79",
+        "eurc6": "29"
+      },
+      {
+        "units": "1",
+        "usdc6": "79",
+        "eurc6": "29"
+      }
+    ]
+  }
+}

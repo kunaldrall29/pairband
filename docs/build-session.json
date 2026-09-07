@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 2,
+  "productVersion": "options-v2",
+  "repository": "https://github.com/kunaldrall29/pairband",
+  "currentStage": "O01",
+  "completedStages": [
+    "O00"
+  ],
+  "blockedStages": {
+    "O03": "Foundry/forge not installed in bootstrap environment",
+    "docker-local": "Docker CLI not available in Cloud Agent environment"
+  },
+  "optionalStagesEnabled": [],
+  "evidence": {
+    "O00": {
+      "inventory": "docs/evidence/o00/repository-inventory.md",
+      "adr": "docs/DECISIONS.md#adr-0001",
+      "localSetup": "docs/evidence/o00/local-setup.md",
+      "fixturesCheck": "passed",
+      "typecheck": "passed",
+      "webBuild": "passed"
+    }
+  },
+  "lastCommit": null,
+  "nextAction": "Execute O01 dependency, Arc and Uniswap compatibility preflight"
+}
