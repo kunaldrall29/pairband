@@ -14,6 +14,7 @@ Optional O24/O25/O32: disabled.
 
 - `pnpm install` — success
 - `pnpm typecheck` — success (packages + apps)
+- `pnpm lint` — success
 - `pnpm test:fixtures` — 2,000 randomized allocation cases passed
 - `@pairband/config|domain|sdk|api|worker` unit tests — pass
 - `pnpm --filter @pairband/web build` — Next.js preview build success

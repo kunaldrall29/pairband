@@ -7,6 +7,7 @@ export default [
       '**/dist/**',
       '**/.next/**',
       '**/coverage/**',
+      '**/next-env.d.ts',
       'docs/**',
       'deployments/**',
       'templates/**',
