@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "productVersion": "options-v2",
   "repository": "pairband",
-  "currentStage": "O07",
+  "currentStage": "O08",
   "completedStages": [
     "O00",
     "O01",
@@ -10,7 +10,8 @@
     "O03",
     "O04",
     "O05",
-    "O06"
+    "O06",
+    "O07"
   ],
   "blockedStages": {
     "mainnet": "Null until official Arc mainnet + Uniswap periphery verified",
@@ -22,8 +23,9 @@
     "O01": "docs/evidence/o01/",
     "O02": "docs/evidence/o02/",
     "O03-O05": "docs/evidence/o03/",
-    "O06": "docs/evidence/o06/"
+    "O06": "docs/evidence/o06/",
+    "O07": "docs/evidence/o07/"
   },
-  "lastCommit": "a7a00f9eee404252abc236e39a1d76f0fdc5d5f3",
-  "nextAction": "O07 narrow swap router with full-fill guarantees. Do not claim audit/mainnet/official Uniswap Arc."
+  "lastCommit": null,
+  "nextAction": "O08 LP PositionManager integration. Label Pairband-deployed instances honestly. Do not claim audit/mainnet."
 }

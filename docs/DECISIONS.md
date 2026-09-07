@@ -41,3 +41,11 @@
 - **Decision:** Pin `Uniswap/v4-core@v4.0.0` for local Anvil tests; implement `PairbandLifecycleHook` + `MarketLauncher`. Label any future Arc deploy as **Pairband-deployed testnet instance**, never official Uniswap. Mainnet Uniswap fields remain null.
 - **Source/evidence:** docs/evidence/o01/uniswap-arc-decision.md, docs/evidence/o06/
 - **Unresolved:** Official Arc Uniswap listing; periphery PositionManager seed path (O08); Arc-specific callback/sender suite (O10)
+
+## ADR-0005 — Narrow PairbandRouter (O07)
+
+- **ID/date/owner:** ADR-0005 / 2026-09-07 / pairband-build
+- **Question:** How should users buy/sell option tokens against registered pools?
+- **Decision:** Single-pool `PairbandRouter` with `buyExactOutput` / `sellExactInput` only. Stored unlock context binds payer to entry `msg.sender`. Partial fills revert. Quotes via `PairbandQuoter` eth_call revert payload — not Trading API / Universal Router.
+- **Source/evidence:** docs/evidence/o07/, protocol §6
+- **Unresolved:** Production gas/slippage UX buffers; Arc-deployed manager address
