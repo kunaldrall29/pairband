@@ -9,6 +9,9 @@ import {
   decodeQuoteResult,
   encodeBuyExactOutput,
   encodeSellExactInput,
+  encodeVaultExercise,
+  encodeVaultMint,
+  encodeVaultRedeem,
   POSM_ACTIONS,
   usdcPerWholeOption,
   wholeOptionsToRaw6,
@@ -62,6 +65,12 @@ test('encodes buy/sell builders with 6-decimal amounts', () => {
     deadline: 1_700_000_000n,
   });
   assert.equal(sell.args[1], 2_500_000n);
+
+  const mint = encodeVaultMint(1_000_000n);
+  assert.equal(mint.signature, 'mint(uint256)');
+  assert.equal(mint.args[0], 1_000_000n);
+  assert.equal(encodeVaultExercise(2n).args[0], 2n);
+  assert.equal(encodeVaultRedeem(3n).args[0], 3n);
 });
 
 test('premium is USDC per option not FX spot', () => {

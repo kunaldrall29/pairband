@@ -8,3 +8,9 @@
 - Full OpenAPI generation + mint/cancel/exercise/redeem prepare remain next
 
 No unsigned transaction is returned as executable in preview without verified deployment.
+
+## Follow-up in same session
+
+- Vault encode helpers: mint/cancel/exercise/redeem/finalize
+- `/v1/actions/prepare` accepts vault actions when manifest allows + vault target present
+- OpenAPI scaffold: `apps/api/openapi/o13-scaffold.yaml` (not generated client yet)

@@ -67,6 +67,40 @@ export function encodeSellExactInput(args: {
   };
 }
 
+const MINT_SIG = 'mint(uint256)' as const;
+const CANCEL_SIG = 'cancel(uint256)' as const;
+const EXERCISE_SIG = 'exercise(uint256)' as const;
+const REDEEM_SIG = 'redeem(uint256)' as const;
+const FINALIZE_SIG = 'finalize()' as const;
+
+/** Vault lifecycle encoders — target is the series vault, not the router. */
+export function encodeVaultMint(units: bigint): { signature: typeof MINT_SIG; args: readonly [bigint] } {
+  if (units <= 0n) throw new Error('units must be positive');
+  return { signature: MINT_SIG, args: [units] };
+}
+
+export function encodeVaultCancel(units: bigint): { signature: typeof CANCEL_SIG; args: readonly [bigint] } {
+  if (units <= 0n) throw new Error('units must be positive');
+  return { signature: CANCEL_SIG, args: [units] };
+}
+
+export function encodeVaultExercise(units: bigint): {
+  signature: typeof EXERCISE_SIG;
+  args: readonly [bigint];
+} {
+  if (units <= 0n) throw new Error('units must be positive');
+  return { signature: EXERCISE_SIG, args: [units] };
+}
+
+export function encodeVaultRedeem(units: bigint): { signature: typeof REDEEM_SIG; args: readonly [bigint] } {
+  if (units <= 0n) throw new Error('units must be positive');
+  return { signature: REDEEM_SIG, args: [units] };
+}
+
+export function encodeVaultFinalize(): { signature: typeof FINALIZE_SIG; args: readonly [] } {
+  return { signature: FINALIZE_SIG, args: [] };
+}
+
 /**
  * Decode PairbandQuoter QuoteResult from eth_call revert data (4-byte selector + ABI args).
  * Quote is not a guarantee — resimulate before signing.

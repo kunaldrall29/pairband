@@ -43,6 +43,11 @@ import {
   assertManifestAllowsActions,
   encodeBuyExactOutput,
   encodeSellExactInput,
+  encodeVaultMint,
+  encodeVaultCancel,
+  encodeVaultExercise,
+  encodeVaultRedeem,
+  encodeVaultFinalize,
   type DeploymentManifest,
 } from "@pairband/sdk";
 
@@ -498,10 +503,46 @@ export async function buildServer(env: Env, opts: BuildServerOptions = {}) {
         requestId: req.requestId,
       };
     }
+    const vaultActions = new Set(["mint", "cancel", "exercise", "redeem", "finalize"]);
+    if (vaultActions.has(body.action)) {
+      const vault =
+        (deployment.contracts.seriesVault as `0x${string}` | undefined) ??
+        (body as { vault?: string }).vault;
+      if (!vault || typeof vault !== "string" || !vault.startsWith("0x")) {
+        return reply.code(503).send(
+          apiError(
+            "UNVERIFIED",
+            "Vault target required from verified manifest or explicit vault address",
+            req.requestId,
+            { statusCode: 503 },
+          ).body,
+        );
+      }
+      const units = BigInt(body.optionUnits ?? "0");
+      const encoded =
+        body.action === "mint"
+          ? encodeVaultMint(units)
+          : body.action === "cancel"
+            ? encodeVaultCancel(units)
+            : body.action === "exercise"
+              ? encodeVaultExercise(units)
+              : body.action === "redeem"
+                ? encodeVaultRedeem(units)
+                : encodeVaultFinalize();
+      return {
+        status: "scaffold",
+        note: "Vault action args validated structurally; full ABI encode + phase/allowance checks required before wallet review. Exercise does not require reference marks.",
+        target: vault,
+        chainId: manifest.chainId,
+        signature: encoded.signature,
+        args: encoded.args.map((a) => (typeof a === "bigint" ? a.toString() : a)),
+        requestId: req.requestId,
+      };
+    }
     return reply.code(400).send(
       apiError(
         "VALIDATION",
-        "Unsupported action in scaffold (buyExactOutput|sellExactInput). Mint/cancel/exercise/redeem arrive next.",
+        "Unsupported action (buyExactOutput|sellExactInput|mint|cancel|exercise|redeem|finalize)",
         req.requestId,
       ).body,
     );
