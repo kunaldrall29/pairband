@@ -18,9 +18,10 @@
       "localSetup": "docs/evidence/o00/local-setup.md",
       "fixturesCheck": "passed",
       "typecheck": "passed",
-      "webBuild": "passed"
+      "webBuild": "passed",
+      "lint": "passed"
     }
   },
-  "lastCommit": "0c99d7c5f74e170d6fc0a02e091f4281cb23a85a",
+  "lastCommit": "0bd4aa0f5220f15425b459e7c2ae181315f0cdb7",
   "nextAction": "Execute O01 dependency, Arc and Uniswap compatibility preflight"
 }
