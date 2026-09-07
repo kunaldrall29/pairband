@@ -38,9 +38,9 @@
 
 - **ID/date/owner:** ADR-0004 / 2026-09-07 / pairband-build
 - **Question:** How to proceed without official Uniswap v4 on Arc?
-- **Decision:** Pin `Uniswap/v4-core@v4.0.0` for local Anvil tests; implement `PairbandLifecycleHook` + `MarketLauncher`. Label any future Arc deploy as **Pairband-deployed testnet instance**, never official Uniswap. Mainnet Uniswap fields remain null.
-- **Source/evidence:** docs/evidence/o01/uniswap-arc-decision.md, docs/evidence/o06/
-- **Unresolved:** Official Arc Uniswap listing; periphery PositionManager seed path (O08); Arc-specific callback/sender suite (O10)
+- **Decision:** Pin Uniswap v4-core (later bumped for periphery `PoolOperation`) and implement `PairbandLifecycleHook` + `MarketLauncher`. Label any future Arc deploy as **Pairband-deployed testnet instance**, never official Uniswap. Mainnet Uniswap fields remain null.
+- **Source/evidence:** docs/evidence/o01/uniswap-arc-decision.md, docs/evidence/o06/, docs/evidence/o08/
+- **Unresolved:** Official Arc Uniswap listing; Arc-specific callback/sender suite (O10)
 
 ## ADR-0005 — Narrow PairbandRouter (O07)
 
@@ -49,3 +49,11 @@
 - **Decision:** Single-pool `PairbandRouter` with `buyExactOutput` / `sellExactInput` only. Stored unlock context binds payer to entry `msg.sender`. Partial fills revert. Quotes via `PairbandQuoter` eth_call revert payload — not Trading API / Universal Router.
 - **Source/evidence:** docs/evidence/o07/, protocol §6
 - **Unresolved:** Production gas/slippage UX buffers; Arc-deployed manager address
+
+## ADR-0006 — PositionManager NFT LP path (O08)
+
+- **ID/date/owner:** ADR-0006 / 2026-09-07 / pairband-build
+- **Question:** How do makers seed/exit option/USDC liquidity?
+- **Decision:** Use pinned Uniswap v4 `PositionManager` + Permit2 Action planner (`MINT_POSITION` / `DECREASE_LIQUIDITY` / zero-liq collect + `CLOSE_CURRENCY`). Do not invent pooled share accounting. Maker free inventory stays separate from vault `accountedUSDC`. Post-cutoff adds blocked by hook; decrease/collect remain allowed.
+- **Source/evidence:** docs/evidence/o08/, `PositionManagerE2E.t.sol`
+- **Unresolved:** Arc-deployed POSM address; official Uniswap listing

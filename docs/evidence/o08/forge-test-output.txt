@@ -7,13 +7,7 @@ Ran 6 tests for test/SeriesLifecycle.t.sol:SeriesLifecycleTest
 [PASS] test_pauseBlocksMintNotCancel() (gas: 397798)
 [PASS] test_termsImmutable_noPublicMutators() (gas: 12097)
 [PASS] test_unauthorizedClaimMintReverts() (gas: 35966)
-Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.78ms (1.09ms CPU time)
-
-Ran 3 tests for test/MakerLpLifecycle.t.sol:MakerLpLifecycleTest
-[PASS] test_tickMathBothSortOrders() (gas: 70259)
-[PASS] test_tradeAgainstMakerThenExitAfterCutoff() (gas: 493676)
-[PASS] test_writerReceiptIndependentOfLpInventory() (gas: 33902)
-Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 14.09ms (703.41µs CPU time)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.74ms (1.08ms CPU time)
 
 Ran 13 tests for test/PairbandRouter.t.sol:PairbandRouterTest
 [PASS] test_bothSortOrders_priceConversionSanity() (gas: 23168)
@@ -29,7 +23,7 @@ Ran 13 tests for test/PairbandRouter.t.sol:PairbandRouterTest
 [PASS] test_sellSlippageReverts() (gas: 291375)
 [PASS] test_stalePhaseReverts() (gas: 63343)
 [PASS] test_zeroAmountReverts() (gas: 35722)
-Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 13.73ms (2.70ms CPU time)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 12.43ms (2.46ms CPU time)
 
 Ran 10 tests for test/PairbandLifecycleHook.t.sol:PairbandLifecycleHookTest
 [PASS] test_addLiquidityAndSwapInTrading() (gas: 541422)
@@ -42,6 +36,17 @@ Ran 10 tests for test/PairbandLifecycleHook.t.sol:PairbandLifecycleHookTest
 [PASS] test_swapBlockedAfterTradingCutoff() (gas: 441472)
 [PASS] test_unauthorizedCallbackReverts() (gas: 40479)
 [PASS] test_wrongPriceInitializeReverts() (gas: 2645959)
-Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 14.62ms (3.14ms CPU time)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 12.55ms (3.06ms CPU time)
 
-Ran 4 test suites in 17.76ms (44.22ms CPU time): 32 tests passed, 0 failed, 0 skipped (32 total tests)
+Ran 2 tests for test/PositionManagerE2E.t.sol:PositionManagerE2ETest
+[PASS] test_posmMintTradeDecreaseCollect_lifecycle() (gas: 686657)
+[PASS] test_unauthorizedNftManagementReverts() (gas: 69065)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 21.00ms (1.26ms CPU time)
+
+Ran 3 tests for test/MakerLpLifecycle.t.sol:MakerLpLifecycleTest
+[PASS] test_tickMathBothSortOrders() (gas: 70259)
+[PASS] test_tradeAgainstMakerThenExitAfterCutoff() (gas: 493676)
+[PASS] test_writerReceiptIndependentOfLpInventory() (gas: 33902)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 22.33ms (936.83µs CPU time)
+
+Ran 5 test suites in 22.85ms (70.05ms CPU time): 34 tests passed, 0 failed, 0 skipped (34 total tests)

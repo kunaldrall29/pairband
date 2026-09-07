@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "productVersion": "options-v2",
   "repository": "pairband",
-  "currentStage": "O08",
+  "currentStage": "O09",
   "completedStages": [
     "O00",
     "O01",
@@ -11,11 +11,10 @@
     "O04",
     "O05",
     "O06",
-    "O07"
+    "O07",
+    "O08"
   ],
-  "partialStages": {
-    "O08": "Core/periphery pin + OptionTickMath + maker LP lifecycle; PositionManager NFT E2E pending"
-  },
+  "partialStages": {},
   "blockedStages": {
     "mainnet": "Null until official Arc mainnet + Uniswap periphery verified",
     "audit": "Requires independent external review (O28)",
@@ -30,6 +29,6 @@
     "O07": "docs/evidence/o07/",
     "O08": "docs/evidence/o08/"
   },
-  "lastCommit": "4675004d6c616c853b19c5dc696f6c50e8645761",
-  "nextAction": "Finish O08 PositionManager NFT mint/decrease/collect against Pairband hook. Do not claim audit/mainnet/official Uniswap Arc."
+  "lastCommit": "pending",
+  "nextAction": "Execute O09 adversarial/invariant suite. Do not claim audit/mainnet/official Uniswap Arc."
 }

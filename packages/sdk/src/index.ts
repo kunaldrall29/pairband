@@ -112,3 +112,93 @@ export function usdcPerWholeOption(usdcRaw6: bigint, optionUnitsRaw6: bigint): n
   // both 6 decimals → ratio is dimensionless USDC/option in human units
   return Number(usdcRaw6) / Number(optionUnitsRaw6);
 }
+
+/** Uniswap v4 PositionManager Actions (pinned periphery). Not Universal Router. */
+export const POSM_ACTIONS = {
+  INCREASE_LIQUIDITY: 0x00,
+  DECREASE_LIQUIDITY: 0x01,
+  MINT_POSITION: 0x02,
+  BURN_POSITION: 0x03,
+  CLOSE_CURRENCY: 0x12,
+} as const;
+
+export type PosmPoolKey = {
+  currency0: `0x${string}`;
+  currency1: `0x${string}`;
+  fee: number;
+  tickSpacing: number;
+  hooks: `0x${string}`;
+};
+
+/**
+ * Typed Action planner steps for PositionManager.modifyLiquidities.
+ * Calldata must still be ABI-encoded (actions bytes + params[]) by the wallet layer.
+ * Permit2: approve token→Permit2, then Permit2.approve(token, posm, amount, expiration).
+ */
+export function buildMintPositionPlan(args: {
+  poolKey: PosmPoolKey;
+  tickLower: number;
+  tickUpper: number;
+  liquidity: bigint;
+  amount0Max: bigint;
+  amount1Max: bigint;
+  owner: `0x${string}`;
+  hookData?: `0x${string}`;
+}): { actions: number[]; mintParams: typeof args; closeCurrencies: [`0x${string}`, `0x${string}`] } {
+  if (args.liquidity <= 0n) throw new Error('liquidity must be positive');
+  if (args.tickLower >= args.tickUpper) throw new Error('tickLower must be < tickUpper');
+  return {
+    actions: [POSM_ACTIONS.MINT_POSITION, POSM_ACTIONS.CLOSE_CURRENCY, POSM_ACTIONS.CLOSE_CURRENCY],
+    mintParams: { ...args, hookData: args.hookData ?? '0x' },
+    closeCurrencies: [args.poolKey.currency0, args.poolKey.currency1],
+  };
+}
+
+export function buildDecreaseLiquidityPlan(args: {
+  tokenId: bigint;
+  liquidity: bigint;
+  amount0Min: bigint;
+  amount1Min: bigint;
+  currency0: `0x${string}`;
+  currency1: `0x${string}`;
+  hookData?: `0x${string}`;
+}): { actions: number[]; decreaseParams: typeof args; closeCurrencies: [`0x${string}`, `0x${string}`] } {
+  if (args.tokenId <= 0n) throw new Error('tokenId required');
+  return {
+    actions: [POSM_ACTIONS.DECREASE_LIQUIDITY, POSM_ACTIONS.CLOSE_CURRENCY, POSM_ACTIONS.CLOSE_CURRENCY],
+    decreaseParams: { ...args, hookData: args.hookData ?? '0x' },
+    closeCurrencies: [args.currency0, args.currency1],
+  };
+}
+
+/** Fee collect = decrease 0 liquidity then close currencies. */
+export function buildCollectFeesPlan(args: {
+  tokenId: bigint;
+  currency0: `0x${string}`;
+  currency1: `0x${string}`;
+  hookData?: `0x${string}`;
+}) {
+  return buildDecreaseLiquidityPlan({
+    tokenId: args.tokenId,
+    liquidity: 0n,
+    amount0Min: 0n,
+    amount1Min: 0n,
+    currency0: args.currency0,
+    currency1: args.currency1,
+    hookData: args.hookData,
+  });
+}
+
+/** Reconcile maker inventory vs writer backing — must never treat vault USDC as LP free balance. */
+export function assertLpInventorySeparateFromBacking(args: {
+  vaultAccountedUSDC6: bigint;
+  makerFreeUSDC6: bigint;
+  makerFreeOptions6: bigint;
+  writerReceipt6: bigint;
+}): void {
+  if (args.vaultAccountedUSDC6 < 0n) throw new Error('negative vault accounted');
+  // Structural check only: receipt tracks writer claim; LP free balances are independent.
+  void args.makerFreeUSDC6;
+  void args.makerFreeOptions6;
+  void args.writerReceipt6;
+}

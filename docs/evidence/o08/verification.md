@@ -1,24 +1,31 @@
-# O08 — LP / PositionManager progress
+# O08 — LP / PositionManager verification
 
-**Status:** partial (local). **Not audited. Not Arc-deployed. Not official Uniswap.**
+**Status:** complete (local). **Not audited. Not Arc-deployed. Not official Uniswap.**
 
 ## Done
 
-- Upgraded pinned v4-core to `59d3ecf5…` (required for current periphery `PoolOperation` types)
-- Pinned v4-periphery `dce236d4…` under `packages/contracts/lib/v4-periphery`
+- Pinned v4-core `59d3ecf5…` + v4-periphery `dce236d4…` (Pairband-deployed fixtures)
 - `OptionTickMath` — USDC-per-whole-option ↔ sqrtPrice/ticks (both sort orders)
-- `MakerLpLifecycle` tests — writer receipt independent of LP inventory; trade against maker; remove liquidity after trading cutoff; vault USDC unchanged
-- Remappings for periphery + permit2
+- `MakerLpLifecycle` — writer receipt independent of LP; trade; post-cutoff remove via `PoolModifyLiquidityTest`
+- **`PositionManagerE2E`** — real periphery POSM + Permit2 + Action planner:
+  - mint NFT liquidity (`MINT_POSITION` + `CLOSE_CURRENCY`)
+  - trade via `PairbandRouter` (vault USDC unchanged)
+  - collect fees (decrease 0)
+  - post-cutoff: increase reverts (hook `TradingDisabled` wrapped); full decrease succeeds
+  - unauthorized NFT management reverts (`NotApproved`)
+- SDK typed POSM planners: `buildMintPositionPlan` / `buildDecreaseLiquidityPlan` / `buildCollectFeesPlan`
 
-## Still open (honest)
+## Honesty
 
-- Full **PositionManager NFT** mint/increase/decrease/collect Action planner path against Pairband hook is **not yet E2E wired** in Pairband tests (Permit2 + descriptor + planner helpers remain). Local LP uses `PoolModifyLiquidityTest` as Anvil stand-in.
-- Any Arc deploy remains a **Pairband-deployed testnet instance**.
+- PoolManager + PositionManager in tests are **Pairband-deployed Anvil fixtures**, not official Uniswap on Arc.
+- Local Anvil ≠ Arc (Osaka, blocklist, Multicall3From) — deferred to O10.
+- Green forge/sdk tests are **not** an audit.
 
 ## Verification
 
 ```text
-forge test  # 32 passed
+forge test  # 34 passed (includes PositionManagerE2ETest)
+pnpm --filter @pairband/sdk test
 ```
 
 See `forge-test-output.txt`.

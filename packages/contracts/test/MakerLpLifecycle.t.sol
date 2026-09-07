@@ -23,8 +23,8 @@ import {OptionTickMath} from "../src/libraries/OptionTickMath.sol";
 import {PairbandRouter} from "../src/PairbandRouter.sol";
 
 /// @notice Maker/LP fixture: writer collateral stays in vault; LP inventory is separate free balances.
-/// @dev Uses PoolModifyLiquidityTest as Anvil stand-in while PositionManager Action planner wiring
-///      is completed against the upgraded core/periphery pin. Label: Pairband-deployed fixture.
+/// @dev Uses PoolModifyLiquidityTest as a lightweight stand-in; see PositionManagerE2E for real POSM NFT path.
+///      Label: Pairband-deployed fixture — not official Uniswap on Arc.
 contract MakerLpLifecycleTest is Test {
     using PoolIdLibrary for PoolKey;
 
