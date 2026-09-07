@@ -13,13 +13,18 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && mkdir -p dist/migrations && cp -R migrations/. dist/migrations/",
+    "migrate": "tsx src/migrate-cli.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src --max-warnings=0",
     "test": "node --import tsx --test src/*.test.ts"
   },
-  "dependencies": {},
+  "dependencies": {
+    "pg": "^8.23.0",
+    "zod": "3.25.76"
+  },
   "devDependencies": {
+    "@types/pg": "^8.23.1",
     "tsx": "4.20.5",
     "typescript": "5.9.2"
   }

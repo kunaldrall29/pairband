@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "productVersion": "options-v2",
   "repository": "pairband",
-  "currentStage": "O07",
+  "currentStage": "O06",
   "completedStages": [
     "O00",
     "O01",
@@ -10,20 +10,29 @@
     "O03",
     "O04",
     "O05",
-    "O06"
+    "O11",
+    "O16"
   ],
+  "partialStages": {
+    "O14": "Payoff endpoint + unavailable reference marks; awaiting O12",
+    "O15": "Outbox lease worker scaffold; email disabled; awaiting O12"
+  },
   "blockedStages": {
     "mainnet": "Null until official Arc mainnet + Uniswap periphery verified",
     "audit": "Requires independent external review (O28)",
-    "O06-official-uniswap-arc": "Official deployments absent; local Pairband-deployed fixture only"
+    "O06-official-uniswap-arc": "Official deployments absent",
+    "O12": "Indexer depends on O05/O06/O08/O11 — O06/O08 still pending"
   },
   "optionalStagesEnabled": [],
   "evidence": {
     "O01": "docs/evidence/o01/",
     "O02": "docs/evidence/o02/",
     "O03-O05": "docs/evidence/o03/",
-    "O06": "docs/evidence/o06/"
+    "O11": "docs/evidence/o11/",
+    "O14-stub": "docs/evidence/o14/",
+    "O15-stub": "docs/evidence/o15/",
+    "O16": "docs/evidence/o16/"
   },
-  "lastCommit": "a7a00f9eee404252abc236e39a1d76f0fdc5d5f3",
-  "nextAction": "O07 narrow swap router with full-fill guarantees. Do not claim audit/mainnet/official Uniswap Arc."
+  "lastCommit": null,
+  "nextAction": "Parallel: O06 Uniswap v4 lifecycle hook; O12 indexer after O06/O08. O17 landing can follow O11+O14+O16 (O14 still stub). Do not claim audit/mainnet."
 }

@@ -97,8 +97,21 @@
       "name": "email",
       "required": false,
       "status": "disabled",
-      "evidence": [],
-      "blocker": "Provider not configured"
+      "evidence": [
+        "docs/evidence/o11/verification.md",
+        "docs/evidence/o15/stub-verification.md"
+      ],
+      "blocker": "Provider not configured; outbox local-capture only"
+    },
+    {
+      "name": "postgres",
+      "required": true,
+      "status": "local-verified",
+      "evidence": [
+        "docs/evidence/o11/verification.md",
+        "packages/database/migrations/001_init.sql"
+      ],
+      "blocker": "Docker Compose unavailable in Cloud Agent; apt Postgres 16 used for O11 evidence"
     }
   ]
 }

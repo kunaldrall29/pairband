@@ -12,9 +12,14 @@
     "test": "node --import tsx --test src/**/*.test.ts"
   },
   "dependencies": {
+    "@fastify/cookie": "^11.1.2",
     "@fastify/cors": "11.1.0",
+    "@fastify/rate-limit": "^11.2.0",
     "@pairband/config": "workspace:*",
-    "fastify": "5.5.0"
+    "@pairband/database": "workspace:*",
+    "@pairband/domain": "workspace:*",
+    "fastify": "5.5.0",
+    "viem": "^2.56.3"
   },
   "devDependencies": {
     "@types/node": "22.18.0",

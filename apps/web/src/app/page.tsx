@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ModeBadge } from "../components/ModeBadge";
 
 const mode = (process.env.NEXT_PUBLIC_PAIRBAND_MODE ?? "preview") as
@@ -14,7 +15,7 @@ export default function PreviewLandingPage() {
         alignContent: "center",
         padding: "clamp(1.5rem, 4vw, 4rem)",
         gap: "1.25rem",
-        maxWidth: "42rem",
+        maxWidth: "44rem",
       }}
     >
       <ModeBadge mode={mode} />
@@ -27,7 +28,7 @@ export default function PreviewLandingPage() {
           color: "var(--muted)",
         }}
       >
-        Pairband
+        Stablecoin FX options on Arc
       </p>
       <h1
         style={{
@@ -35,43 +36,45 @@ export default function PreviewLandingPage() {
           fontFamily: "var(--font-display)",
           fontSize: "clamp(2.4rem, 6vw, 3.6rem)",
           lineHeight: 1.05,
-          fontWeight: 600,
+          fontWeight: 700,
         }}
       >
         Pairband
       </h1>
       <p style={{ margin: 0, fontSize: "1.125rem", color: "var(--muted)", maxWidth: "36rem" }}>
-        USDC-backed EURC options on Arc — preview scaffold only. No live markets, quotes, or
+        Set your EURC exit rate. Keep your upside. Preview scaffold — no live markets, quotes, or
         financial actions in this build.
       </p>
       <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
-        <a
-          href="/app"
+        <Link
+          href="/protect"
           style={{
             display: "inline-block",
             padding: "0.75rem 1.1rem",
             background: "var(--action)",
             color: "#fff",
             textDecoration: "none",
-            borderRadius: "4px",
+            borderRadius: 12,
+            fontWeight: 600,
           }}
         >
           Open app shell
-        </a>
-        <a
-          href="https://github.com/kunaldrall29/pairband"
+        </Link>
+        <Link
+          href="/markets"
           style={{
             display: "inline-block",
             padding: "0.75rem 1.1rem",
             border: "1px solid var(--border)",
             color: "var(--text)",
             textDecoration: "none",
-            borderRadius: "4px",
+            borderRadius: 12,
             background: "var(--surface)",
+            fontWeight: 600,
           }}
         >
-          Repository
-        </a>
+          Markets (preview)
+        </Link>
       </div>
     </main>
   );

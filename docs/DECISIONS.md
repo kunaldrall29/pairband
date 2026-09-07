@@ -23,6 +23,26 @@
 - **Source:** docs/reference/release-gates.md, O01 evidence (Uniswap Arc not listed)
 - **Unresolved:** External auditor engagement; official Uniswap on Arc; Arc mainnet config; maker capital; counsel sign-off
 
+## ADR-0003 — Postgres outbox without Redis (O11/O15)
+
+- **ID/date/owner:** ADR-0003 / 2026-09-07 / pairband-build
+- **Question:** Should Pairband introduce Redis for job queues and session storage?
+- **Existing constraint:** O11 prefers Postgres job leases; Render free tier simplicity; secrets stay server-side.
+- **Options evaluated:** (a) Redis + BullMQ; (b) Postgres `SKIP LOCKED` outbox; (c) in-process only.
+- **Decision:** (b). `outbox_jobs` with dedupe keys, expiring leases, bounded retries, dead-letter. Sessions/nonces hashed in Postgres. Redis remains optional later if scale requires it.
+- **Affected:** packages/database, apps/api, apps/worker
+- **Source/evidence:** docs/reference/data-schema.md, docs/evidence/o11/, docs/evidence/o15/
+- **Unresolved:** Production email provider configuration; reminder schedule after O12 series indexing
+
+## ADR-0004 — Preview defaults for API series and reference marks (O11/O14)
+
+- **ID/date/owner:** ADR-0004 / 2026-09-07 / pairband-build
+- **Question:** What should public series/quote/mark endpoints return before the indexer exists?
+- **Decision:** Return explicit unavailable / 503 INDEXER_UNAVAILABLE states. Never invent live series, zero premiums, or FX marks. Educational payoff endpoint is labeled `illustrative` and reuses domain math fixtures only.
+- **Affected:** apps/api `/v1/series*`, `/v1/reference-marks`, `/v1/analytics/payoff`
+- **Unresolved:** Licensed reference-mark source selection (O14 full)
+
+
 ## ADR-0003 — Arc docs MCP + skill adoption (docs-only)
 
 - **ID/date/owner:** ADR-0003 / 2026-09-07 / pairband-build

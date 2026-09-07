@@ -12,7 +12,8 @@
     "test": "node --import tsx --test src/**/*.test.ts"
   },
   "dependencies": {
-    "@pairband/config": "workspace:*"
+    "@pairband/config": "workspace:*",
+    "@pairband/database": "workspace:*"
   },
   "devDependencies": {
     "tsx": "4.20.5",

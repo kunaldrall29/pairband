@@ -1,14 +1,25 @@
 :root {
-  --canvas: #f6f5f0;
-  --surface: #ffffff;
-  --text: #102e33;
-  --muted: #52666a;
-  --action: #087f75;
-  --soft: #c9e8dd;
-  --border: #d7dfda;
-  --warning: #8a5700;
-  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-  --font-body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --pb-canvas: #f6f5f0;
+  --pb-surface: #ffffff;
+  --pb-text: #102e33;
+  --pb-muted: #52666a;
+  --pb-action: #087f75;
+  --pb-eurc: #4267c8;
+  --pb-soft: #c9e8dd;
+  --pb-border: #d7dfda;
+  --pb-warning: #8a5700;
+  --pb-critical: #b42318;
+  --canvas: var(--pb-canvas);
+  --surface: var(--pb-surface);
+  --text: var(--pb-text);
+  --muted: var(--pb-muted);
+  --action: var(--pb-action);
+  --soft: var(--pb-soft);
+  --border: var(--pb-border);
+  --warning: var(--pb-warning);
+  --font-display: var(--font-manrope), "Manrope", "Segoe UI", sans-serif;
+  --font-body: var(--font-inter), "Inter", "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
 }
 
 * {
@@ -23,7 +34,7 @@ body {
 
 body {
   font-family: var(--font-body);
-  color: var(--text);
+  color: var(--pb-text);
   background:
     radial-gradient(1200px 600px at 10% -10%, #c9e8dd 0%, transparent 55%),
     radial-gradient(900px 500px at 100% 0%, #dce8f5 0%, transparent 50%),
@@ -31,5 +42,19 @@ body {
 }
 
 a {
-  color: var(--action);
+  color: var(--pb-action);
+}
+
+:focus-visible {
+  outline: 3px solid var(--pb-eurc);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
