@@ -17,6 +17,11 @@ import {
   phaseAt,
   redeemPayout,
   usdcBacking6,
+  assertWriterIllustrativeLoss,
+  buildEducationalPayoffSeries,
+  referenceMarkUnavailable,
+  unquotedActiveOptionValue,
+  ILLUSTRATIVE_WRITER_LOSS,
 } from './index.js';
 
 const fixturesPath = join(
@@ -183,4 +188,18 @@ test('independent model conserves through mint/exercise/redeem', () => {
 test('formatRaw6', () => {
   assert.equal(formatRaw6(11_000_000_000n), '11000');
   assert.equal(formatRaw6(110_000n), '0.11');
+});
+
+test('O14 chart series and writer illustrative loss 800', () => {
+  assertWriterIllustrativeLoss();
+  const series = buildEducationalPayoffSeries();
+  assert.equal(series.kind, 'illustrative');
+  const at1 = series.points.find((p) => p.spotUsdcPerEurc === '1.00');
+  assert.equal(at1?.protectedAfterPremiumUsdc, '10800');
+  assert.equal(at1?.writerPnLUsdc, '-800');
+  const missed = buildEducationalPayoffSeries({ missedExercise: true, spots: ['1.00'] });
+  assert.equal(missed.points[0]?.longOnlyPnLUsdc, '-200');
+  assert.equal(referenceMarkUnavailable().status, 'unavailable');
+  assert.equal(unquotedActiveOptionValue().kind, 'unavailable');
+  assert.equal(ILLUSTRATIVE_WRITER_LOSS.illustrativeLossUsdc, 800n);
 });

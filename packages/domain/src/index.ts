@@ -304,3 +304,167 @@ export function educationalPayoffs(input: PayoffInputs): {
   const writerPnLUsdc = P - grossOption; // ignores C for writer panel example
   return { unprotectedUsdc, protectedAfterPremiumUsdc, longOnlyPnLUsdc, writerPnLUsdc };
 }
+
+/** Landing/hero illustrative defaults — not an executable quote. */
+export const ILLUSTRATIVE_HERO = {
+  kind: "illustrative" as const,
+  exposureEurc: 10_000n,
+  strikeUsdcPerEurc: "1.10",
+  premiumUsdc: 200n,
+  optionQuantityWhole: "100",
+  eurcCoverage: "10000",
+  usdcOnExercise: "11000",
+  exerciseWindowLabel: "Example window (not a live listing)",
+  note: "Illustrative example — not an executable quote",
+};
+
+/** Writer panel: 11,000 USDC backing, all exercised at spot 1.00 → illustrative 800 USDC loss. */
+export const ILLUSTRATIVE_WRITER_LOSS = {
+  kind: "illustrative" as const,
+  backingUsdc: 11_000n,
+  premiumReceivedUsdc: 200n,
+  eurcReturned: 10_000n,
+  spotUsdcPerEurc: "1.00",
+  eurcMarkUsdc: 10_000n,
+  illustrativeLossUsdc: 800n,
+  note: "Illustrative writer downside — not a live P&L or APY",
+};
+
+export type ReferenceMarkStatus =
+  | { status: "unavailable"; reason: string; pair: string; price: null }
+  | {
+      status: "available";
+      pair: string;
+      price: string;
+      units: string;
+      source: string;
+      observedAt: string;
+      stale: boolean;
+      method?: string;
+    };
+
+export function referenceMarkUnavailable(
+  pair = "EURC_USDC",
+): Extract<ReferenceMarkStatus, { status: "unavailable" }> {
+  return {
+    status: "unavailable",
+    pair,
+    price: null,
+    reason: "No verified reference-mark provider configured",
+  };
+}
+
+export type PortfolioValueHonesty =
+  | { kind: "unavailable"; reason: string }
+  | { kind: "illustrative"; valueUsdc: string; note: string }
+  | { kind: "estimated"; valueUsdc: string; provenance: string; stale: boolean }
+  | { kind: "actual"; valueUsdc: string; blockNumber: string };
+
+export function unquotedActiveOptionValue(): PortfolioValueHonesty {
+  return {
+    kind: "unavailable",
+    reason: "No executable quote — value is not shown as zero",
+  };
+}
+
+export type PayoffChartPoint = {
+  spotUsdcPerEurc: string;
+  unprotectedUsdc: string;
+  protectedAfterPremiumUsdc: string;
+  longOnlyPnLUsdc: string;
+  writerPnLUsdc: string;
+};
+
+export type PayoffChartSeries = {
+  kind: "illustrative";
+  assumptions: {
+    exposureEurc: string;
+    strikeUsdcPerEurc: string;
+    premiumUsdc: string;
+    additionalCostsUsdc: string;
+    missedExercise: boolean;
+  };
+  points: PayoffChartPoint[];
+  summary: string;
+};
+
+const DEFAULT_EDU_SPOTS = ["0.90", "1.00", "1.05", "1.10", "1.15", "1.20", "1.30"];
+
+/** Chart/table series from integer domain math; SVG may use floats only after this. */
+export function buildEducationalPayoffSeries(input: {
+  exposureEurc?: bigint;
+  strikeUsdcPerEurc?: string;
+  premiumUsdc?: bigint;
+  additionalCostsUsdc?: bigint;
+  missedExercise?: boolean;
+  spots?: string[];
+} = {}): PayoffChartSeries {
+  const exposureEurc = input.exposureEurc ?? ILLUSTRATIVE_HERO.exposureEurc;
+  const strikeUsdcPerEurc = input.strikeUsdcPerEurc ?? ILLUSTRATIVE_HERO.strikeUsdcPerEurc;
+  const premiumUsdc = input.premiumUsdc ?? ILLUSTRATIVE_HERO.premiumUsdc;
+  const additionalCostsUsdc = input.additionalCostsUsdc ?? 0n;
+  const missedExercise = Boolean(input.missedExercise);
+  const spots = input.spots ?? DEFAULT_EDU_SPOTS;
+
+  const points: PayoffChartPoint[] = spots.map((spot) => {
+    const base: PayoffInputs = {
+      exposureEurc,
+      strikeUsdcPerEurc,
+      premiumUsdc,
+      spotUsdcPerEurc: spot,
+      missedExercise,
+    };
+    if (additionalCostsUsdc !== 0n) {
+      base.additionalCostsUsdc = additionalCostsUsdc;
+    }
+    const out = educationalPayoffs(base);
+    return {
+      spotUsdcPerEurc: spot,
+      unprotectedUsdc: out.unprotectedUsdc.toString(),
+      protectedAfterPremiumUsdc: out.protectedAfterPremiumUsdc.toString(),
+      longOnlyPnLUsdc: out.longOnlyPnLUsdc.toString(),
+      writerPnLUsdc: out.writerPnLUsdc.toString(),
+    };
+  });
+
+  const atOne = points.find((p) => p.spotUsdcPerEurc === "1.00");
+  const summary = missedExercise
+    ? `Missed exercise: option component is zero; premium ${premiumUsdc.toString()} USDC remains spent.`
+    : atOne
+      ? `At 1.00 USDC/EURC, protected holding after ${premiumUsdc.toString()} USDC premium is ${atOne.protectedAfterPremiumUsdc} USDC (illustrative).`
+      : "Illustrative payoff series — not executable.";
+
+  return {
+    kind: "illustrative",
+    assumptions: {
+      exposureEurc: exposureEurc.toString(),
+      strikeUsdcPerEurc,
+      premiumUsdc: premiumUsdc.toString(),
+      additionalCostsUsdc: additionalCostsUsdc.toString(),
+      missedExercise,
+    },
+    points,
+    summary,
+  };
+}
+
+export function assertWriterIllustrativeLoss(): void {
+  const out = educationalPayoffs({
+    exposureEurc: ILLUSTRATIVE_HERO.exposureEurc,
+    strikeUsdcPerEurc: ILLUSTRATIVE_HERO.strikeUsdcPerEurc,
+    premiumUsdc: ILLUSTRATIVE_HERO.premiumUsdc,
+    spotUsdcPerEurc: "1.00",
+  });
+  if (out.writerPnLUsdc !== -ILLUSTRATIVE_WRITER_LOSS.illustrativeLossUsdc) {
+    throw new DomainError(
+      "FIXTURE",
+      `expected writer PnL -${ILLUSTRATIVE_WRITER_LOSS.illustrativeLossUsdc}, got ${out.writerPnLUsdc}`,
+    );
+  }
+  const recovered =
+    ILLUSTRATIVE_WRITER_LOSS.eurcMarkUsdc + ILLUSTRATIVE_WRITER_LOSS.premiumReceivedUsdc;
+  const loss = ILLUSTRATIVE_WRITER_LOSS.backingUsdc - recovered;
+  if (loss !== ILLUSTRATIVE_WRITER_LOSS.illustrativeLossUsdc) {
+    throw new DomainError("FIXTURE", "writer backing arithmetic drifted");
+  }
+}

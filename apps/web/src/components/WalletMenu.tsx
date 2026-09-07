@@ -3,7 +3,7 @@
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { ARC_TESTNET_CHAIN, networkBadgeStyle } from "@pairband/ui";
 
-export function WalletMenu({ mode: _mode }: { mode: "preview" | "testnet" | "mainnet" }) {
+export function WalletMenu({ mode }: { mode: "preview" | "testnet" | "mainnet" }) {
   const { address, isConnected, chainId } = useAccount();
   const { connect, connectors, isPending, error } = useConnect();
   const { disconnect } = useDisconnect();

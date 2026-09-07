@@ -12,11 +12,16 @@ Product: Pairband options-v2.
 | O03 | complete (local) | packages/contracts + docs/evidence/o03/ | Arc deploy / explorer verify = O10 |
 | O04 | complete (local) | mint/cancel forge tests | Arc-specific token behavior = O10 |
 | O05 | complete (local) | exercise/redeem + dust forge tests | Independent review still required |
-| O11 | complete (local) | docs/evidence/o11/ | Indexer O12 next for series data; email provider disabled |
-| O14 | stub | docs/evidence/o14/ | Needs O12 for realized analytics; reference marks unavailable |
-| O15 | stub | docs/evidence/o15/ | Needs O12; provider disabled; outbox leases work locally |
-| O16 | complete (local) | docs/evidence/o16/ | Landing O17; flows O18+ after quotes |
-| O06–O10, O12–O13, O17–O32 | pending | — | Protocol O06 lifecycle hook; service O12 indexer |
+| O06 | complete (local) on protocol branches | docs/evidence/o06/ (bootstrap/o06) | Periphery seed O08 after O07; Arc callback suite O10 |
+| O07 | in progress (other branch) | — | Blocks O08 |
+| O08 | pending | — | Requires O07 |
+| O11 | complete (local) | docs/evidence/o11/ | — |
+| O12 | blocked | — | Needs O06+O08+O11; O08 missing |
+| O14 | partial (fixtures) | docs/evidence/o14/ | Full marks/analytics need O12 |
+| O15 | stub | docs/evidence/o15/ | Needs O12; email disabled |
+| O16 | complete (local) | docs/evidence/o16/ | — |
+| O17 | complete (preview) | docs/evidence/o17/ | Screenshots/Playwright matrix optional follow-up |
+| O09–O10, O13, O18–O32 | pending | — | Protocol O07→O08; service O12 after O08 |
 
 ### Production / audit / mainnet
 
@@ -25,6 +30,7 @@ Product: Pairband options-v2.
 | Production-grade local vault economics | Core mint/cancel/exercise/redeem + dust/pause/donation tests pass locally |
 | API + private preferences foundation | Local Postgres + auth/session/early-access tests pass; no fabricated series |
 | Shared app shell / design tokens | Preview shell + wallet state machine; no live finance |
+| Public landing (preview) | Illustrative payoff + real early-access persistence; no live markets |
 | Professional security audit | **Not done** — O28 prepares package; this agent cannot self-issue an audit |
 | Mainnet ready | **Blocked** — mainnet null; no official Uniswap Arc; Gates 4–5 unmet |
 | Funded pilot | **Blocked** on independent review, legal, maker liquidity |

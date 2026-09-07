@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Manrope, Inter, IBM_Plex_Mono } from "next/font/google";
-import { Providers } from "../providers/Providers";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -29,12 +28,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+/** Root layout: no wallet SDK — keep marketing first paint light (O17). */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${manrope.variable} ${inter.variable} ${plexMono.variable}`}>
-      <body>
-        <Providers>{children}</Providers>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

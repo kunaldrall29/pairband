@@ -61,3 +61,11 @@
 - **Decision:** Pin `Uniswap/v4-core@v4.0.0` for local Anvil tests; implement `PairbandLifecycleHook` + `MarketLauncher`. Label any future Arc deploy as **Pairband-deployed testnet instance**, never official Uniswap. Mainnet Uniswap fields remain null.
 - **Source/evidence:** docs/evidence/o01/uniswap-arc-decision.md, docs/evidence/o06/
 - **Unresolved:** Official Arc Uniswap listing; periphery PositionManager seed path (O08); Arc-specific callback/sender suite (O10)
+
+## ADR-0005 — Landing early access without live markets (O17)
+
+- **ID/date/owner:** ADR-0005 / 2026-09-07 / pairband-build
+- **Question:** Can O17 ship while O14 is only fixture-deepened and O12 is blocked?
+- **Decision:** Yes for preview. Landing uses illustrative payoff series from domain fixtures, Example market cards, and real early-access persistence via O11. No live quotes/TVL. O12 remains required before claiming indexed markets.
+- **Affected:** apps/web landing, packages/domain payoff helpers, docs/evidence/o14+o17
+- **Unresolved:** Playwright responsive screenshots; licensed reference marks

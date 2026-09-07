@@ -32,7 +32,7 @@ import {
   type ContractWalletVerifier,
 } from "./lib/auth-crypto.js";
 import { loadPublicDeployment } from "./lib/deployment.js";
-import { educationalPayoffs } from "@pairband/domain";
+import { educationalPayoffs, buildEducationalPayoffSeries, referenceMarkUnavailable } from "@pairband/domain";
 
 export type BuildServerOptions = {
   pool?: DbPool | null;
@@ -215,12 +215,9 @@ export async function buildServer(env: Env, opts: BuildServerOptions = {}) {
   });
 
   app.get("/v1/reference-marks", async (req, reply) => {
-    // O14 stub: no verified licensed FX source configured → typed unavailable.
+    const mark = referenceMarkUnavailable();
     return reply.code(200).send({
-      pair: "EURC_USDC",
-      status: "unavailable",
-      reason: "No verified reference-mark provider configured",
-      price: null,
+      ...mark,
       note: "Reference marks are informational only and never gate exercise",
       requestId: req.requestId,
     });
@@ -244,6 +241,13 @@ export async function buildServer(env: Env, opts: BuildServerOptions = {}) {
         additionalCostsUsdc: body.additionalCostsUsdc ? BigInt(body.additionalCostsUsdc) : 0n,
         missedExercise: Boolean(body.missedExercise),
       });
+      const series = buildEducationalPayoffSeries({
+        exposureEurc: BigInt(body.exposureEurc ?? "10000"),
+        strikeUsdcPerEurc: body.strikeUsdcPerEurc ?? "1.10",
+        premiumUsdc: BigInt(body.premiumUsdc ?? "200"),
+        additionalCostsUsdc: body.additionalCostsUsdc ? BigInt(body.additionalCostsUsdc) : 0n,
+        missedExercise: Boolean(body.missedExercise),
+      });
       return {
         kind: "illustrative",
         assumptions: {
@@ -259,6 +263,7 @@ export async function buildServer(env: Env, opts: BuildServerOptions = {}) {
           longOnlyPnLUsdc: result.longOnlyPnLUsdc.toString(),
           writerPnLUsdc: result.writerPnLUsdc.toString(),
         },
+        series,
         note: "Educational payoff only — not an executable quote or settlement authority",
       };
     } catch (e) {
