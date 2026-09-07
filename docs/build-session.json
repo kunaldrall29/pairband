@@ -24,6 +24,6 @@
     "O03-O05": "docs/evidence/o03/",
     "O06": "docs/evidence/o06/"
   },
-  "lastCommit": "65dc325da62a7980a44fde2035010532a3fd7180",
+  "lastCommit": "a7a00f9eee404252abc236e39a1d76f0fdc5d5f3",
   "nextAction": "O07 narrow swap router with full-fill guarantees. Do not claim audit/mainnet/official Uniswap Arc."
 }
