@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@pairband/config": "workspace:*",
-    "@pairband/database": "workspace:*"
+    "@pairband/database": "workspace:*",
+    "@pairband/indexer": "workspace:*"
   },
   "devDependencies": {
     "tsx": "4.20.5",

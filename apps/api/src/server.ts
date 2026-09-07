@@ -33,6 +33,47 @@ import {
 } from "./lib/auth-crypto.js";
 import { loadPublicDeployment } from "./lib/deployment.js";
 import { educationalPayoffs, buildEducationalPayoffSeries, referenceMarkUnavailable } from "@pairband/domain";
+import {
+  fixtureLifecycleBatches,
+  replayAll,
+  indexerLag,
+  type IndexerState,
+} from "@pairband/indexer";
+import {
+  assertManifestAllowsActions,
+  encodeBuyExactOutput,
+  encodeSellExactInput,
+  type DeploymentManifest,
+} from "@pairband/sdk";
+
+
+type IndexerMode = "disabled" | "fixture" | "anvil" | "arc-rpc";
+
+function resolveIndexerMode(): IndexerMode {
+  const raw = (process.env.INDEXER_MODE ?? "disabled").toLowerCase();
+  if (raw === "fixture" || raw === "anvil" || raw === "arc-rpc" || raw === "disabled") {
+    return raw;
+  }
+  return "disabled";
+}
+
+function loadFixtureIndexerState(mode: "fixture" | "anvil"): IndexerState {
+  const { batches } = fixtureLifecycleBatches();
+  return replayAll(31_337, batches, mode);
+}
+
+function serializeAccounting(state: IndexerState) {
+  return [...state.accounting.values()].map((row) => ({
+    seriesId: row.seriesId,
+    writerUnits: row.writerUnits.toString(),
+    exercisedUnits: row.exercisedUnits.toString(),
+    redeemedUnits: row.redeemedUnits.toString(),
+    accountedUsdc6: row.accountedUsdc6.toString(),
+    accountedEurc6: row.accountedEurc6.toString(),
+    asOfBlock: row.asOfBlock.toString(),
+    asOfHash: row.asOfHash,
+  }));
+}
 
 export type BuildServerOptions = {
   pool?: DbPool | null;
@@ -161,9 +202,14 @@ export async function buildServer(env: Env, opts: BuildServerOptions = {}) {
         detail: env.GRAPH_ENABLED ? "enabled optional" : "disabled",
       },
       indexer: {
-        ok: false,
+        ok: resolveIndexerMode() === "fixture" || resolveIndexerMode() === "anvil",
         required: false,
-        detail: "Indexer arrives in O12 — not required for API foundation",
+        detail:
+          resolveIndexerMode() === "disabled"
+            ? "INDEXER_MODE=disabled — set fixture|anvil for local labeled reads"
+            : resolveIndexerMode() === "arc-rpc"
+              ? "arc-rpc opt-in only; not auto-indexed in this process"
+              : `local ${resolveIndexerMode()} indexer labeled — not Arc live`,
       },
     };
 
@@ -194,23 +240,270 @@ export async function buildServer(env: Env, opts: BuildServerOptions = {}) {
 
   app.get("/v1/deployment", async () => loadPublicDeployment(env));
 
+  app.get("/v1/indexer/status", async (req) => {
+    const mode = resolveIndexerMode();
+    if (mode === "disabled") {
+      return {
+        available: false,
+        mode,
+        source: null,
+        note: "Indexer disabled. Use INDEXER_MODE=fixture|anvil for local labeled reads. Arc live indexing is opt-in only.",
+        requestId: req.requestId,
+      };
+    }
+    if (mode === "arc-rpc") {
+      return {
+        available: false,
+        mode,
+        source: "arc-rpc",
+        note: "Arc RPC indexing is read-only labeled and not auto-run in this API process.",
+        requestId: req.requestId,
+      };
+    }
+    const state = loadFixtureIndexerState(mode);
+    const tip = state.checkpoint?.lastBlock ?? 0n;
+    const lag = indexerLag({ indexedThroughBlock: tip, tipBlock: tip });
+    return {
+      available: true,
+      mode,
+      source: state.sourceLabel,
+      chainId: state.chainId,
+      generation: state.generation,
+      indexedThroughBlock: tip.toString(),
+      lastBlockHash: state.checkpoint?.lastBlockHash ?? null,
+      status: state.checkpoint?.status ?? "ok",
+      lag: { lagBlocks: lag.lagBlocks.toString(), stale: lag.stale },
+      seriesCount: state.series.size,
+      note: "Local fixture/anvil projections only — not Arc live chain data",
+      requestId: req.requestId,
+    };
+  });
+
   app.get("/v1/series", async (req, reply) => {
-    // Explicit unavailable until indexer (O12) — do not invent live series.
-    return reply.code(503).send(
+    const mode = resolveIndexerMode();
+    if (mode !== "fixture" && mode !== "anvil") {
+      return reply.code(503).send(
+        apiError(
+          "INDEXER_UNAVAILABLE",
+          "Series listing requires INDEXER_MODE=fixture|anvil (local) or a populated RPC indexer. No fabricated live Arc series.",
+          req.requestId,
+          { statusCode: 503, retryable: true },
+        ).body,
+      );
+    }
+    const state = loadFixtureIndexerState(mode);
+    const series = [...state.series.values()].map((s) => {
+      const acc = state.accounting.get(s.seriesId.toLowerCase());
+      return {
+        seriesId: s.seriesId,
+        vault: s.vault,
+        longToken: s.longToken,
+        writerReceipt: s.writerReceipt,
+        strikePerUnit6: s.strikePerUnit6.toString(),
+        tradingStart: s.tradingStart.toString(),
+        exerciseStart: s.exerciseStart.toString(),
+        exerciseEnd: s.exerciseEnd.toString(),
+        paused: s.paused,
+        accounting: acc
+          ? {
+              writerUnits: acc.writerUnits.toString(),
+              exercisedUnits: acc.exercisedUnits.toString(),
+              redeemedUnits: acc.redeemedUnits.toString(),
+              accountedUsdc6: acc.accountedUsdc6.toString(),
+              accountedEurc6: acc.accountedEurc6.toString(),
+              asOfBlock: acc.asOfBlock.toString(),
+              asOfHash: acc.asOfHash,
+            }
+          : null,
+      };
+    });
+    return {
+      source: state.sourceLabel,
+      provenance: {
+        chainId: state.chainId,
+        blockNumber: state.checkpoint?.lastBlock.toString() ?? "0",
+        blockHash: state.checkpoint?.lastBlockHash ?? null,
+        observedAt: new Date().toISOString(),
+        source: "fixture",
+        stale: false,
+        indexedThroughBlock: state.checkpoint?.lastBlock.toString() ?? "0",
+        label: mode,
+      },
+      series,
+      accounting: serializeAccounting(state),
+      note: "Labeled local indexer read model — not live Arc markets",
+      requestId: req.requestId,
+    };
+  });
+
+  app.get("/v1/series/:id", async (req, reply) => {
+    const mode = resolveIndexerMode();
+    if (mode !== "fixture" && mode !== "anvil") {
+      return reply.code(404).send(
+        apiError("UNKNOWN_SERIES", "Series not found — indexer not populated", req.requestId, {
+          statusCode: 404,
+        }).body,
+      );
+    }
+    const id = String((req.params as { id: string }).id).toLowerCase();
+    const state = loadFixtureIndexerState(mode);
+    const row = state.series.get(id);
+    if (!row) {
+      return reply.code(404).send(
+        apiError("UNKNOWN_SERIES", "Series not in local fixture indexer", req.requestId, {
+          statusCode: 404,
+        }).body,
+      );
+    }
+    const acc = state.accounting.get(id);
+    return {
+      source: state.sourceLabel,
+      series: {
+        seriesId: row.seriesId,
+        vault: row.vault,
+        longToken: row.longToken,
+        writerReceipt: row.writerReceipt,
+        strikePerUnit6: row.strikePerUnit6.toString(),
+        tradingStart: row.tradingStart.toString(),
+        exerciseStart: row.exerciseStart.toString(),
+        exerciseEnd: row.exerciseEnd.toString(),
+        paused: row.paused,
+      },
+      accounting: acc
+        ? {
+            writerUnits: acc.writerUnits.toString(),
+            exercisedUnits: acc.exercisedUnits.toString(),
+            redeemedUnits: acc.redeemedUnits.toString(),
+            accountedUsdc6: acc.accountedUsdc6.toString(),
+            accountedEurc6: acc.accountedEurc6.toString(),
+            asOfBlock: acc.asOfBlock.toString(),
+            asOfHash: acc.asOfHash,
+          }
+        : null,
+      note: "Labeled local indexer read model — not live Arc markets",
+      requestId: req.requestId,
+    };
+  });
+
+  /** O13 scaffold: quotes require verified deployment + simulation — never invent premiums. */
+  app.post("/v1/quotes", async (req, reply) => {
+    const deployment = loadPublicDeployment(env);
+    const body = (req.body ?? {}) as {
+      seriesId?: string;
+      side?: string;
+      optionUnits?: string;
+    };
+    if (!body.seriesId || !body.side || !body.optionUnits) {
+      return reply.code(400).send(
+        apiError("VALIDATION", "seriesId, side, optionUnits required", req.requestId).body,
+      );
+    }
+    if (env.PAIRBAND_MODE === "preview" || !deployment.verified) {
+      return reply.code(503).send(
+        apiError(
+          "UNVERIFIED",
+          "Quotes unavailable until a verified deployment and quoter simulation exist. No fabricated premiums.",
+          req.requestId,
+          { statusCode: 503, retryable: true },
+        ).body,
+      );
+    }
+    return reply.code(501).send(
       apiError(
-        "INDEXER_UNAVAILABLE",
-        "Series listing requires the canonical indexer (O12). No fixture live series are returned outside named preview fixtures.",
+        "NOT_IMPLEMENTED",
+        "Live quote simulation pending verified pool/router addresses (O13 continuation)",
         req.requestId,
-        { statusCode: 503, retryable: true },
+        { statusCode: 501 },
       ).body,
     );
   });
 
-  app.get("/v1/series/:id", async (req, reply) => {
-    return reply.code(404).send(
-      apiError("UNKNOWN_SERIES", "Series not found — indexer not populated", req.requestId, {
-        statusCode: 404,
-      }).body,
+  /** O13 scaffold: prepare unsigned txs only when manifest allows. */
+  app.post("/v1/actions/prepare", async (req, reply) => {
+    const deployment = loadPublicDeployment(env);
+    const body = (req.body ?? {}) as {
+      action?: string;
+      seriesId?: string;
+      optionUnits?: string;
+      maxUSDC6?: string;
+      minUSDC6?: string;
+      deadline?: string;
+    };
+    if (!body.action || !body.seriesId) {
+      return reply.code(400).send(
+        apiError("VALIDATION", "action and seriesId required", req.requestId).body,
+      );
+    }
+    const router =
+      (deployment.contracts.pairbandRouter as `0x${string}` | undefined) ??
+      (deployment.contracts.router as `0x${string}` | undefined) ??
+      null;
+    const manifest: DeploymentManifest = {
+      schemaVersion: 2,
+      mode: env.PAIRBAND_MODE,
+      verified: Boolean(deployment.verified),
+      chainId: deployment.chainId ?? null,
+      pairbandRouter: router,
+    };
+    try {
+      assertManifestAllowsActions(manifest);
+    } catch (e) {
+      return reply.code(503).send(
+        apiError("UNVERIFIED", (e as Error).message, req.requestId, {
+          statusCode: 503,
+          retryable: true,
+        }).body,
+      );
+    }
+    if (!manifest.pairbandRouter) {
+      return reply.code(503).send(
+        apiError("UNVERIFIED", "pairbandRouter missing from verified manifest", req.requestId, {
+          statusCode: 503,
+        }).body,
+      );
+    }
+    const units = BigInt(body.optionUnits ?? "0");
+    const deadline = BigInt(body.deadline ?? "0");
+    if (body.action === "buyExactOutput") {
+      const encoded = encodeBuyExactOutput({
+        seriesId: body.seriesId as `0x${string}`,
+        optionUnits: units,
+        maxUSDC6: BigInt(body.maxUSDC6 ?? "0"),
+        deadline,
+      });
+      return {
+        status: "scaffold",
+        note: "Calldata args validated structurally; full ABI encode + RPC simulation required before wallet review",
+        target: manifest.pairbandRouter,
+        chainId: manifest.chainId,
+        signature: encoded.signature,
+        args: encoded.args.map((a) => (typeof a === "bigint" ? a.toString() : a)),
+        requestId: req.requestId,
+      };
+    }
+    if (body.action === "sellExactInput") {
+      const encoded = encodeSellExactInput({
+        seriesId: body.seriesId as `0x${string}`,
+        optionUnits: units,
+        minUSDC6: BigInt(body.minUSDC6 ?? "0"),
+        deadline,
+      });
+      return {
+        status: "scaffold",
+        note: "Calldata args validated structurally; full ABI encode + RPC simulation required before wallet review",
+        target: manifest.pairbandRouter,
+        chainId: manifest.chainId,
+        signature: encoded.signature,
+        args: encoded.args.map((a) => (typeof a === "bigint" ? a.toString() : a)),
+        requestId: req.requestId,
+      };
+    }
+    return reply.code(400).send(
+      apiError(
+        "VALIDATION",
+        "Unsupported action in scaffold (buyExactOutput|sellExactInput). Mint/cancel/exercise/redeem arrive next.",
+        req.requestId,
+      ).body,
     );
   });
 

@@ -144,8 +144,36 @@ test("auth nonce replay and CSRF on reminders", async () => {
   assert.equal(rem.emailDelivery, "disabled");
   assert.ok(rem.status === "pending_verification" || rem.status === "saved");
 
+  const prevIndexer = process.env.INDEXER_MODE;
+  process.env.INDEXER_MODE = "disabled";
   const seriesStub = await app.inject({ method: "GET", url: "/v1/series" });
   assert.equal(seriesStub.statusCode, 503);
+
+  process.env.INDEXER_MODE = "fixture";
+  const seriesFixture = await app.inject({ method: "GET", url: "/v1/series" });
+  assert.equal(seriesFixture.statusCode, 200);
+  const seriesBody = seriesFixture.json() as {
+    source: string;
+    series: unknown[];
+    note: string;
+  };
+  assert.equal(seriesBody.source, "fixture");
+  assert.ok(seriesBody.series.length >= 1);
+  assert.match(seriesBody.note, /not live Arc/i);
+
+  const indexerStatus = await app.inject({ method: "GET", url: "/v1/indexer/status" });
+  assert.equal(indexerStatus.statusCode, 200);
+  assert.equal((indexerStatus.json() as { available: boolean }).available, true);
+
+  const quotesPreview = await app.inject({
+    method: "POST",
+    url: "/v1/quotes",
+    payload: { seriesId: `0x${"11".repeat(32)}`, side: "buy", optionUnits: "1000000" },
+  });
+  assert.equal(quotesPreview.statusCode, 503);
+
+  if (prevIndexer === undefined) delete process.env.INDEXER_MODE;
+  else process.env.INDEXER_MODE = prevIndexer;
 
   const marks = await app.inject({ method: "GET", url: "/v1/reference-marks" });
   assert.equal(marks.statusCode, 200);

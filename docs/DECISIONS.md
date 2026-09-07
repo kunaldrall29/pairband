@@ -69,3 +69,12 @@
 - **Decision:** Yes for preview. Landing uses illustrative payoff series from domain fixtures, Example market cards, and real early-access persistence via O11. No live quotes/TVL. O12 remains required before claiming indexed markets.
 - **Affected:** apps/web landing, packages/domain payoff helpers, docs/evidence/o14+o17
 - **Unresolved:** Playwright responsive screenshots; licensed reference marks
+
+## ADR-0006 — Local fixture indexer before Arc live RPC (O12)
+
+- **ID/date/owner:** ADR-0006 / 2026-09-07 / pairband-build
+- **Question:** How should series/read models be served before Arc deployment indexing?
+- **Decision:** Ship `@pairband/indexer` with fixture/Anvil labeled replay, checkpoint conflict → `needs_reconciliation`, and donation-aware reconcile. Default `INDEXER_MODE=disabled`. Arc live RPC is opt-in (`arc-rpc`) and must stay read-only labeled — never fabricate live series.
+- **Affected:** packages/indexer, apps/worker, apps/api `/v1/series`, `/v1/indexer/status`
+- **Source/evidence:** docs/evidence/o12/, docs/prompts/O12-*.md
+- **Unresolved:** Postgres projection upsert path under load; Arc O10 deployment for labeled arc-rpc reads

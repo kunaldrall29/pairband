@@ -19,7 +19,9 @@
     "@pairband/database": "workspace:*",
     "@pairband/domain": "workspace:*",
     "fastify": "5.5.0",
-    "viem": "^2.56.3"
+    "viem": "^2.56.3",
+    "@pairband/indexer": "workspace:*",
+    "@pairband/sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "22.18.0",

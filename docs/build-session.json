@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "productVersion": "options-v2",
   "repository": "pairband",
-  "currentStage": "O07",
+  "currentStage": "O13",
   "completedStages": [
     "O00",
     "O01",
@@ -13,16 +13,20 @@
     "O06",
     "O11",
     "O16",
-    "O17"
+    "O17",
+    "O07",
+    "O08",
+    "O12"
   ],
   "partialStages": {
-    "O14": "Educational payoff series + unavailable marks; awaiting O12 for realized analytics",
-    "O15": "Outbox lease worker scaffold; email disabled; awaiting O12"
+    "O14": "Educational payoff series + unavailable marks; indexer fixtures enable next pass",
+    "O15": "Outbox lease worker + optional fixture indexer tick; email disabled",
+    "O13": "SDK encode + /v1/quotes|/v1/actions/prepare honest unavailable/scaffold; OpenAPI pending"
   },
   "blockedStages": {
     "mainnet": "Null until official Arc mainnet + Uniswap periphery verified",
     "audit": "Requires independent external review (O28)",
-    "O12": "Requires O08 (blocked on O07)"
+    "O13-live-quotes": "Requires verified deployment + quoter simulation; preview returns UNVERIFIED"
   },
   "optionalStagesEnabled": [],
   "evidence": {
@@ -34,8 +38,10 @@
     "O14": "docs/evidence/o14/",
     "O15-stub": "docs/evidence/o15/",
     "O16": "docs/evidence/o16/",
-    "O17": "docs/evidence/o17/"
+    "O17": "docs/evidence/o17/",
+    "O12": "docs/evidence/o12/",
+    "O13-scaffold": "docs/evidence/o13/"
   },
   "lastCommit": "7671154ee129afc7df3f7f54d5538327aa49ec49",
-  "nextAction": "O07 narrow router then O08 PositionManager; O12 indexer after O08. Do not claim audit/mainnet."
+  "nextAction": "Continue O13 quotes/prepare/OpenAPI against verified local/Anvil deploy; do not invent Arc series or premiums."
 }

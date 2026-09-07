@@ -47,12 +47,12 @@
     {
       "name": "uniswap-v4-periphery",
       "required": true,
-      "status": "blocked-official-arc-absent",
+      "status": "complete-on-protocol-branches",
       "evidence": [
         "docs/evidence/o01/uniswap-arc-decision.md",
         "docs/evidence/o06/verification.md"
       ],
-      "blocker": "PositionManager seed deferred to O08; no official Arc periphery"
+      "blocker": "Official Arc periphery still absent; Pairband-deployed POSM path on o08/bootstrap"
     },
     {
       "name": "circle-funding",
@@ -112,6 +112,16 @@
         "packages/database/migrations/001_init.sql"
       ],
       "blocker": "Docker Compose unavailable in Cloud Agent; apt Postgres 16 used for O11 evidence"
+    },
+    {
+      "name": "rpc-indexer",
+      "required": true,
+      "status": "local-fixture-verified",
+      "evidence": [
+        "docs/evidence/o12/verification.md",
+        "packages/indexer/"
+      ],
+      "blocker": "Arc live indexing opt-in only; Graph not required"
     }
   ]
 }

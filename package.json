@@ -8,9 +8,9 @@
   },
   "scripts": {
     "dev": "pnpm -r --parallel --filter @pairband/web --filter @pairband/api --filter @pairband/worker run dev",
-    "build": "pnpm --filter @pairband/config --filter @pairband/domain --filter @pairband/sdk --filter @pairband/ui --filter @pairband/database run build && pnpm -r --filter \"./apps/**\" run build",
+    "build": "pnpm --filter @pairband/config --filter @pairband/domain --filter @pairband/sdk --filter @pairband/ui --filter @pairband/database --filter @pairband/indexer run build && pnpm -r --filter \"./apps/**\" run build",
     "lint": "pnpm -r run lint",
-    "typecheck": "pnpm --filter @pairband/config --filter @pairband/domain --filter @pairband/sdk --filter @pairband/ui --filter @pairband/database run build && pnpm -r run typecheck",
+    "typecheck": "pnpm --filter @pairband/config --filter @pairband/domain --filter @pairband/sdk --filter @pairband/ui --filter @pairband/database --filter @pairband/indexer run build && pnpm -r run typecheck",
     "test": "pnpm -r run test",
     "test:fixtures": "python3 docs/fixtures/verify_accounting.py",
     "format": "prettier --write ."
