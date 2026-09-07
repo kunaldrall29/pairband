@@ -36,6 +36,6 @@
     "O16": "docs/evidence/o16/",
     "O17": "docs/evidence/o17/"
   },
-  "lastCommit": null,
+  "lastCommit": "48afe8fdf512de45a3f2254ec4dbc1e709b9b300",
   "nextAction": "O07 narrow router then O08 PositionManager; O12 indexer after O08. Do not claim audit/mainnet."
 }
