@@ -1,0 +1,25 @@
+{
+  "name": "pairband",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.33.3",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter @pairband/web --filter @pairband/api --filter @pairband/worker run dev",
+    "build": "pnpm --filter @pairband/config --filter @pairband/domain --filter @pairband/sdk --filter @pairband/ui --filter @pairband/database --filter @pairband/indexer run build && pnpm -r --filter \"./apps/**\" run build",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm --filter @pairband/config --filter @pairband/domain --filter @pairband/sdk --filter @pairband/ui --filter @pairband/database --filter @pairband/indexer run build && pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "test:fixtures": "python3 docs/fixtures/verify_accounting.py",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@types/node": "22.18.0",
+    "eslint": "9.34.0",
+    "prettier": "3.6.2",
+    "typescript": "5.9.2",
+    "typescript-eslint": "8.41.0"
+  }
+}

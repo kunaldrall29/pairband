@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 2,
+  "mode": "mainnet",
+  "verified": false,
+  "chainId": null,
+  "rpcUrl": null,
+  "explorerUrl": null,
+  "tokens": {
+    "usdc": {
+      "address": null,
+      "decimals": null,
+      "verified": false
+    },
+    "eurc": {
+      "address": null,
+      "decimals": null,
+      "verified": false
+    }
+  },
+  "contracts": {
+    "seriesFactory": null,
+    "registry": null,
+    "lifecycleHook": null,
+    "router": null,
+    "poolManager": null,
+    "positionManager": null,
+    "quoter": null,
+    "stateView": null,
+    "permit2": null,
+    "marketLauncher": null
+  },
+  "deploymentProvenance": null,
+  "gitCommit": null,
+  "compiler": null,
+  "evmTarget": null,
+  "dependencyCommits": {},
+  "codeHashes": {},
+  "deployTransactions": {},
+  "series": [],
+  "releaseGates": {
+    "securityReview": false,
+    "legalReview": false,
+    "makerReadiness": false,
+    "operationalReadiness": false
+  }
+}

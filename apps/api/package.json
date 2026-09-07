@@ -1,0 +1,32 @@
+{
+  "name": "@pairband/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "lint": "eslint src --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test src/**/*.test.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.1.2",
+    "@fastify/cors": "11.1.0",
+    "@fastify/rate-limit": "^11.2.0",
+    "@pairband/config": "workspace:*",
+    "@pairband/database": "workspace:*",
+    "@pairband/domain": "workspace:*",
+    "fastify": "5.5.0",
+    "viem": "^2.56.3",
+    "@pairband/indexer": "workspace:*",
+    "@pairband/sdk": "workspace:*",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.0",
+    "tsx": "4.20.5",
+    "typescript": "5.9.2"
+  }
+}

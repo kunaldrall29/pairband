@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 2,
+  "productVersion": "options-v2",
+  "repository": "pairband",
+  "currentStage": "O22",
+  "completedStages": [
+    "O00",
+    "O01",
+    "O02",
+    "O03",
+    "O04",
+    "O05",
+    "O06",
+    "O11",
+    "O16",
+    "O17",
+    "O07",
+    "O08",
+    "O12",
+    "O13",
+    "O18",
+    "O19",
+    "O20",
+    "O21"
+  ],
+  "partialStages": {
+    "O14": "Educational payoff series + unavailable marks; indexer fixtures enable next pass",
+    "O15": "Outbox lease worker + optional fixture indexer tick; email disabled"
+  },
+  "blockedStages": {
+    "mainnet": "Null until official Arc mainnet + Uniswap periphery verified",
+    "audit": "Requires independent external review (O28)",
+    "O13-live-quotes": "Requires verified deployment + quoter simulation; fixture quotes labeled non-executable"
+  },
+  "optionalStagesEnabled": [],
+  "evidence": {
+    "O01": "docs/evidence/o01/",
+    "O02": "docs/evidence/o02/",
+    "O03-O05": "docs/evidence/o03/",
+    "O06": "docs/evidence/o06/",
+    "O11": "docs/evidence/o11/",
+    "O14": "docs/evidence/o14/",
+    "O15-stub": "docs/evidence/o15/",
+    "O16": "docs/evidence/o16/",
+    "O17": "docs/evidence/o17/",
+    "O12": "docs/evidence/o12/",
+    "O13-scaffold": "docs/evidence/o13/",
+    "O13": "docs/evidence/o13/",
+    "O18": "docs/evidence/o18/",
+    "O19": "docs/evidence/o19/",
+    "O20": "docs/evidence/o20/",
+    "O21": "docs/evidence/o21/"
+  },
+  "lastCommit": "4c0d602",
+  "nextAction": "O22 advanced LP UI or O10 Arc deploy for executable txs; keep preview honesty."
+}

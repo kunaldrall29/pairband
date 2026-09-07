@@ -1,0 +1,32 @@
+{
+  "name": "@pairband/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --import tsx --test src/**/*.test.ts"
+  },
+  "dependencies": {
+    "@pairband/config": "workspace:*",
+    "@pairband/domain": "workspace:*",
+    "@pairband/ui": "workspace:*",
+    "@tanstack/react-query": "^5.102.8",
+    "next": "15.5.2",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "viem": "^2.56.3",
+    "wagmi": "^2.16.9",
+    "@pairband/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.0",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
+    "tsx": "4.20.5",
+    "typescript": "5.9.2"
+  }
+}

@@ -1,0 +1,25 @@
+No files changed, compilation skipped
+
+Ran 6 tests for test/SeriesLifecycle.t.sol:SeriesLifecycleTest
+[PASS] test_donationDoesNotInflateClaims() (gas: 405889)
+[PASS] test_dustCumulativeAllocation() (gas: 3994707)
+[PASS] test_mintCancelExerciseRedeem_fixtureAmounts() (gas: 797690)
+[PASS] test_pauseBlocksMintNotCancel() (gas: 397798)
+[PASS] test_termsImmutable_noPublicMutators() (gas: 12097)
+[PASS] test_unauthorizedClaimMintReverts() (gas: 35966)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 2.11ms (1.70ms CPU time)
+
+Ran 10 tests for test/PairbandLifecycleHook.t.sol:PairbandLifecycleHookTest
+[PASS] test_addLiquidityAndSwapInTrading() (gas: 541422)
+[PASS] test_boundaries_scheduledAndMaturedBlockTradingOps() (gas: 3686127)
+[PASS] test_duplicateSeriesPoolReverts() (gas: 51781)
+[PASS] test_mismatchedFeeKeyRejectedOnInit() (gas: 2643405)
+[PASS] test_newRiskPauseBlocksSwapAndAdd() (gas: 574896)
+[PASS] test_permissionMaskAndRuntimeCode() (gas: 5249)
+[PASS] test_removeLiquidityAfterTradingCutoff() (gas: 521084)
+[PASS] test_swapBlockedAfterTradingCutoff() (gas: 441472)
+[PASS] test_unauthorizedCallbackReverts() (gas: 40479)
+[PASS] test_wrongPriceInitializeReverts() (gas: 2645959)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 15.39ms (3.24ms CPU time)
+
+Ran 2 test suites in 15.83ms (17.50ms CPU time): 16 tests passed, 0 failed, 0 skipped (16 total tests)

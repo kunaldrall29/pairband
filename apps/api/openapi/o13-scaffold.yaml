@@ -1,0 +1,8 @@
+# Deprecated hand stub — canonical OpenAPI is generated at runtime:
+# GET /v1/openapi.json from @pairband/sdk generateOpenApiDocument (same Zod schemas).
+openapi: 3.1.0
+info:
+  title: Pairband API (see /v1/openapi.json)
+  version: 0.0.0-o13
+  description: Use GET /v1/openapi.json — do not maintain a second schema.
+paths: {}

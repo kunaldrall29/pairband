@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 2,
+  "reviewedAt": "2026-09-07",
+  "integrations": [
+    {
+      "name": "arc",
+      "required": true,
+      "status": "verified-testnet",
+      "evidence": [
+        "docs/evidence/o01/arc-rpc-preflight.json",
+        "docs/evidence/o01/arc-platform-notes.md",
+        "https://docs.arc.io/arc/references/connect-to-arc"
+      ],
+      "blocker": null
+    },
+    {
+      "name": "arc-docs-mcp",
+      "required": false,
+      "status": "configured",
+      "evidence": [
+        ".cursor/mcp.json",
+        "docs/evidence/o01/arc-platform-notes.md"
+      ],
+      "blocker": null
+    },
+    {
+      "name": "usdc-eurc",
+      "required": true,
+      "status": "verified-testnet",
+      "evidence": [
+        "docs/evidence/o01/arc-rpc-preflight.json",
+        "docs/evidence/o01/arc-platform-notes.md"
+      ],
+      "blocker": null
+    },
+    {
+      "name": "uniswap-v4-core",
+      "required": true,
+      "status": "pinned-local-tests",
+      "evidence": [
+        "docs/evidence/o01/uniswap-arc-decision.md",
+        "docs/evidence/o06/verification.md",
+        "packages/contracts/foundry.lock"
+      ],
+      "blocker": "Official Arc listing absent; local/Pairband-deployed testnet path only"
+    },
+    {
+      "name": "uniswap-v4-periphery",
+      "required": true,
+      "status": "complete-on-protocol-branches",
+      "evidence": [
+        "docs/evidence/o01/uniswap-arc-decision.md",
+        "docs/evidence/o06/verification.md"
+      ],
+      "blocker": "Official Arc periphery still absent; Pairband-deployed POSM path on o08/bootstrap"
+    },
+    {
+      "name": "circle-funding",
+      "required": false,
+      "status": "disabled",
+      "evidence": [
+        "docs/evidence/o01/arc-platform-notes.md"
+      ],
+      "blocker": "Optional O24 not enabled; App Kit does not swap option tokens"
+    },
+    {
+      "name": "circle-wallets",
+      "required": false,
+      "status": "disabled",
+      "evidence": [],
+      "blocker": "Optional O24 not enabled"
+    },
+    {
+      "name": "circle-app-kit",
+      "required": false,
+      "status": "disabled",
+      "evidence": [
+        "docs/evidence/o01/arc-platform-notes.md"
+      ],
+      "blocker": "Optional; Swap assets exclude Pairband option tokens"
+    },
+    {
+      "name": "uniswap-trading-api",
+      "required": false,
+      "status": "disabled",
+      "evidence": [],
+      "blocker": "Option token routing unverified"
+    },
+    {
+      "name": "graph",
+      "required": false,
+      "status": "disabled",
+      "evidence": [],
+      "blocker": "Optional O25 not enabled"
+    },
+    {
+      "name": "email",
+      "required": false,
+      "status": "disabled",
+      "evidence": [
+        "docs/evidence/o11/verification.md",
+        "docs/evidence/o15/stub-verification.md"
+      ],
+      "blocker": "Provider not configured; outbox local-capture only"
+    },
+    {
+      "name": "postgres",
+      "required": true,
+      "status": "local-verified",
+      "evidence": [
+        "docs/evidence/o11/verification.md",
+        "packages/database/migrations/001_init.sql"
+      ],
+      "blocker": "Docker Compose unavailable in Cloud Agent; apt Postgres 16 used for O11 evidence"
+    },
+    {
+      "name": "rpc-indexer",
+      "required": true,
+      "status": "local-fixture-verified",
+      "evidence": [
+        "docs/evidence/o12/verification.md",
+        "packages/indexer/"
+      ],
+      "blocker": "Arc live indexing opt-in only; Graph not required"
+    }
+  ]
+}

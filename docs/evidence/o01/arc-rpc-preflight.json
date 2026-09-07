@@ -1,0 +1,40 @@
+{
+  "checkedAt": "2026-09-07T18:53:38Z",
+  "rpc": "https://rpc.testnet.arc.io",
+  "checks": {
+    "chainId": {
+      "value": 5042002,
+      "expected": 5042002,
+      "ok": true
+    },
+    "latestBlock": {
+      "number": 60952514,
+      "hash": "0x64490e55f830e0e09f5f58a800de76d3b8cafcf5a2267b599654f82e7c4a6b8a",
+      "timestamp": 1788807218
+    },
+    "usdcErc20": {
+      "address": "0x3600000000000000000000000000000000000000",
+      "bytecodePresent": true,
+      "bytecodeLength": 1798,
+      "codeSha256": "0xd06405421b354a12b2f03fcc8aac4b324f274aed5b8ecc5fd62d8fa119067154",
+      "decimals": 6,
+      "decimalsOk": true
+    },
+    "eurc": {
+      "address": "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a",
+      "bytecodePresent": true,
+      "bytecodeLength": 1798,
+      "codeSha256": "0x971d3ebaa21004c98d41e2a98a24287e9b5bffa23cb93b64c4f5a71d119058a1",
+      "decimals": 6,
+      "decimalsOk": true
+    }
+  },
+  "uniswapV4OfficialArc": {
+    "status": "not_listed",
+    "source": "https://developers.uniswap.org/docs/protocols/v4/deployments"
+  },
+  "mainnet": {
+    "verified": false,
+    "chainId": null
+  }
+}
