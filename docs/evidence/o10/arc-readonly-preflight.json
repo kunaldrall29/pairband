@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "stage": "O10",
+  "checkedAt": "2026-09-07T19:47:54Z",
+  "rpc": "https://rpc.testnet.arc.io",
+  "broadcast": false,
+  "broadcastAuthorization": "absent \u2014 dry-run / read-only only",
+  "checks": {
+    "chainId": {
+      "value": 5042002,
+      "expected": 5042002,
+      "ok": true
+    },
+    "latestBlock": {
+      "number": 60958862,
+      "hash": "0x57b8eb3e75a70f0a4893ee349c000a1106a87572a85604ffde692d6297c953ff",
+      "timestamp": 1788810474
+    },
+    "gas": {
+      "eth_gasPriceWei": 25000000000,
+      "eth_gasPriceGwei": 25.0,
+      "minBaseFeeFloorGwei": 20,
+      "aboveFloor": true,
+      "eth_maxPriorityFeePerGasWei": 5000000000,
+      "recommendation": "Set maxFeePerGas >= 20 Gwei; observed price may exceed floor"
+    },
+    "usdcErc20": {
+      "address": "0x3600000000000000000000000000000000000000",
+      "bytecodePresent": true,
+      "bytecodeLength": 1798,
+      "codeSha256": "0xd06405421b354a12b2f03fcc8aac4b324f274aed5b8ecc5fd62d8fa119067154",
+      "decimals": 6,
+      "decimalsOk": true,
+      "matchesO01CodeSha": true
+    },
+    "eurc": {
+      "address": "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a",
+      "bytecodePresent": true,
+      "bytecodeLength": 1798,
+      "codeSha256": "0x971d3ebaa21004c98d41e2a98a24287e9b5bffa23cb93b64c4f5a71d119058a1",
+      "decimals": 6,
+      "decimalsOk": true,
+      "matchesO01CodeSha": true
+    },
+    "nativeUsdcModel": {
+      "nativeDecimals": 18,
+      "erc20Decimals": 6,
+      "sameFunds": true,
+      "noWrappedUsdcOnArc": true,
+      "sampleEthGetBalanceZeroAddrPlus1": "0xd14cd23a7a1913ae98d",
+      "note": "Do not mix native 18-dec gas units with ERC-20 6-dec vault amounts"
+    },
+    "infrastructure": {
+      "create2Factory": {
+        "address": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+        "bytecodePresent": true,
+        "bytecodeLength": 69,
+        "codeSha256": "0xe0af82ad2e5188285db8ba0b2ae054d13f0fd4fe325c48c7f2dace48454404b9"
+      },
+      "multicall3": {
+        "address": "0xcA11bde05977b3631167028862bE2a173976CA11",
+        "bytecodePresent": true,
+        "bytecodeLength": 3808,
+        "codeSha256": "0x2756d7c52baee85cacb504f6ee1df7aad6809ac8d94a4a111d76991f90d36d6e"
+      },
+      "multicall3From": {
+        "address": "0x522fAf9A91c41c443c66765030741e4AaCe147D0",
+        "bytecodePresent": true,
+        "bytecodeLength": 3180,
+        "codeSha256": "0xfda56ac4127d0954991512969ffc98338e5d70666b59e134db9e67b62b70dc94"
+      },
+      "permit2": {
+        "address": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+        "bytecodePresent": true,
+        "bytecodeLength": 9152,
+        "codeSha256": "0x8775d18e0c793683f09d5168ac059ec39e884d692216d4d63e3881444cc01616"
+      },
+      "memo": {
+        "address": "0x5294E9927c3306DcBaDb03fe70b92e01cCede505",
+        "bytecodePresent": true,
+        "bytecodeLength": 1228,
+        "codeSha256": "0x731fba584e11528fce63f82c3a4716066c90124229895e4c7f59a47e597c813c"
+      }
+    },
+    "blocklistFixture": {
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "eth_getBalance": "0xbb337ffc1b4e9324",
+      "note": "Value transfer to/from this address reverts on Arc; not exercised (no broadcast)."
+    },
+    "uniswapV4OfficialArc": {
+      "status": "not_listed",
+      "source": "https://developers.uniswap.org/docs/protocols/v4/deployments",
+      "pairbandPath": "self-deploy PoolManager labeled Pairband-deployed testnet instance"
+    },
+    "weth": {
+      "officialOnArc": false,
+      "note": "Arc has no WETH; native USDC is already IERC20. POSM needs Pairband stub WETH or alternate periphery plan."
+    },
+    "mainnet": {
+      "verified": false,
+      "chainId": null
+    }
+  }
+}

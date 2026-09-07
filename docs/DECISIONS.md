@@ -65,3 +65,11 @@
 - **Decision:** Maintain a Solidity twin of the O02 `SeriesAccountingModel` as a ghost, drive multi-actor Foundry invariant sequences across two series, and keep a threat register with Slither triage. Donations tracked separately from accounted reserves. Green local suite is **not** an audit.
 - **Source/evidence:** docs/evidence/o09/
 - **Unresolved:** External review (O28); Arc-specific runtime (O10)
+
+## ADR-0008 — Arc deploy dry-run first; POSM WETH gap (O10)
+
+- **ID/date/owner:** ADR-0008 / 2026-09-07 / pairband-build
+- **Question:** How to proceed on Arc without broadcast auth and without WETH?
+- **Decision:** Ship reviewable `DeployPairband` script gated by `PAIRBAND_ALLOW_BROADCAST`, refresh read-only RPC preflight (gas floor, token codehashes, Multicall3From). Keep manifest `verified:false` with null contract addresses until real txs. Defer PositionManager on Arc until a reviewed Pairband WETH-stub/descriptor plan exists (Arc has no WETH; native USDC is already IERC20). Label any future PoolManager as Pairband-deployed.
+- **Source/evidence:** docs/evidence/o10/, deployments/arc-testnet.json
+- **Unresolved:** Deployer authorization; live lifecycle receipts; POSM-on-Arc design

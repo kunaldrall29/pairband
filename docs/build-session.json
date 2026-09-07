@@ -15,11 +15,14 @@
     "O08",
     "O09"
   ],
-  "partialStages": {},
+  "partialStages": {
+    "O10": "Dry-run deploy scripts + Arc read-only preflight; broadcasts pending authorization; no lifecycle tx hashes"
+  },
   "blockedStages": {
     "mainnet": "Null until official Arc mainnet + Uniswap periphery verified",
     "audit": "Requires independent external review (O28)",
-    "O06-official-uniswap-arc": "Official deployments absent; local Pairband-deployed fixture only"
+    "O06-official-uniswap-arc": "Official deployments absent; local Pairband-deployed fixture only",
+    "O10-broadcast": "Managed deployer authorization + PAIRBAND_ALLOW_BROADCAST required"
   },
   "optionalStagesEnabled": [],
   "evidence": {
@@ -29,8 +32,9 @@
     "O06": "docs/evidence/o06/",
     "O07": "docs/evidence/o07/",
     "O08": "docs/evidence/o08/",
-    "O09": "docs/evidence/o09/"
+    "O09": "docs/evidence/o09/",
+    "O10": "docs/evidence/o10/"
   },
-  "lastCommit": "7ff0088a02ec060230cb3e258ddc303b9e7bf1ba",
-  "nextAction": "Execute O10 Arc runtime / Multicall3From evidence. Do not claim audit/mainnet/official Uniswap Arc."
+  "lastCommit": "f9634f258ade24c668e4b5b8475b0dc1dbc0c29d",
+  "nextAction": "Authorized Arc broadcast to complete O10 lifecycle evidence; O12 service prep may start against fixtures/labeled pending manifest. No audit/mainnet claims."
 }

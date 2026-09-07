@@ -5,13 +5,14 @@
     {
       "name": "arc",
       "required": true,
-      "status": "verified-testnet",
+      "status": "verified-testnet-rpc",
       "evidence": [
         "docs/evidence/o01/arc-rpc-preflight.json",
         "docs/evidence/o01/arc-platform-notes.md",
-        "https://docs.arc.io/arc/references/connect-to-arc"
+        "https://docs.arc.io/arc/references/connect-to-arc",
+        "docs/evidence/o10/arc-readonly-preflight.json"
       ],
-      "blocker": null
+      "blocker": "Contract lifecycle broadcast pending (O10 partial)"
     },
     {
       "name": "arc-docs-mcp",
@@ -62,7 +63,7 @@
         "docs/evidence/o08/verification.md",
         "packages/contracts/foundry.lock"
       ],
-      "blocker": "Official Arc listing absent; POSM path is Pairband-deployed fixture only"
+      "blocker": "Official Arc listing absent; local POSM OK; Arc POSM deferred (no WETH on Arc)"
     },
     {
       "name": "circle-funding",
@@ -109,6 +110,17 @@
       "status": "disabled",
       "evidence": [],
       "blocker": "Provider not configured"
+    },
+    {
+      "name": "pairband-arc-deploy",
+      "required": true,
+      "status": "dry-run-pending-broadcast",
+      "evidence": [
+        "docs/evidence/o10/verification.md",
+        "deployments/arc-testnet.json",
+        "packages/contracts/script/DeployPairband.s.sol"
+      ],
+      "blocker": "PAIRBAND_ALLOW_BROADCAST + managed deployer authorization required"
     }
   ]
 }
