@@ -1,0 +1,14 @@
+node_modules
+.pnpm-store
+dist
+.next
+.turbo
+coverage
+.env
+.env.local
+*.log
+.DS_Store
+tsconfig.tsbuildinfo
+cache
+out
+broadcast
