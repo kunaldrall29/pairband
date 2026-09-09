@@ -1,4 +1,5 @@
-export const API_ORIGIN = process.env.NEXT_PUBLIC_API_ORIGIN ?? "http://localhost:3001";
+/** Same-origin API (Next.js rewrite → backend). Session is cookie-only. */
+export const API_BASE = "/api";
 
 export type ChainConfigResponse = {
   chain: { key: string; chainId: number; name: string; rpcUrl: string; explorerUrl: string };
@@ -51,8 +52,24 @@ export type ActivityItem = {
   explorerUrl: string;
 };
 
+export type PayAuthorizeResponse =
+  | { ok: true; spent: string; remaining: string | null }
+  | { ok: false; error: "spend_limit_exceeded"; spent: string; limit: string };
+
+async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
+  const headers = new Headers(init?.headers);
+  if (!headers.has("content-type") && init?.body) {
+    headers.set("content-type", "application/json");
+  }
+  return fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers,
+    credentials: "include",
+  });
+}
+
 export async function fetchConfig(): Promise<ChainConfigResponse> {
-  const res = await fetch(`${API_ORIGIN}/v1/config`, { cache: "no-store" });
+  const res = await apiFetch("/v1/config", { cache: "no-store" });
   if (!res.ok) throw new Error("config_unavailable");
   return res.json();
 }
@@ -65,13 +82,30 @@ export async function fetchQuote(body: {
   payee?: string;
   reference?: string;
 }): Promise<QuoteResponse> {
-  const res = await fetch(`${API_ORIGIN}/v1/quotes`, {
+  const res = await apiFetch("/v1/quotes", {
     method: "POST",
-    headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error("quote_failed");
   return res.json();
+}
+
+export async function payAuthorize(orgId: string, amountIn: string): Promise<PayAuthorizeResponse> {
+  const res = await apiFetch(`/v1/orgs/${orgId}/pay-authorize`, {
+    method: "POST",
+    body: JSON.stringify({ amountIn }),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (res.status === 403 && body.error === "spend_limit_exceeded") {
+    return {
+      ok: false,
+      error: "spend_limit_exceeded",
+      spent: body.spent as string,
+      limit: body.limit as string,
+    };
+  }
+  if (!res.ok) throw new Error((body.error as string) ?? "authorize_failed");
+  return body as PayAuthorizeResponse;
 }
 
 export async function postReceipt(
@@ -81,15 +115,8 @@ export async function postReceipt(
     quoteId?: string;
   },
 ) {
-  const headers: Record<string, string> = { "content-type": "application/json" };
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("pairband_session");
-    if (token) headers["x-session-token"] = token;
-  }
-  const res = await fetch(`${API_ORIGIN}/v1/receipts`, {
+  const res = await apiFetch("/v1/receipts", {
     method: "POST",
-    headers,
-    credentials: "include",
     body: JSON.stringify(body),
   });
   if (!res.ok) {
@@ -100,16 +127,7 @@ export async function postReceipt(
 }
 
 export async function fetchActivity(): Promise<ActivityItem[]> {
-  const headers: Record<string, string> = {};
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("pairband_session");
-    if (token) headers["x-session-token"] = token;
-  }
-  const res = await fetch(`${API_ORIGIN}/v1/activity`, {
-    cache: "no-store",
-    credentials: "include",
-    headers,
-  });
+  const res = await apiFetch("/v1/activity", { cache: "no-store" });
   if (!res.ok) throw new Error("activity_failed");
   const data = (await res.json()) as { items: ActivityItem[] };
   return data.items;

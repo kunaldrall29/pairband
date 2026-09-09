@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useAccount, usePublicClient, useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { isAddressLike, validateMemo } from "@pairband/domain";
 import { ACTIVE_CHAIN } from "@pairband/config";
-import { fetchQuote, formatUnits, parseUnits, postReceipt, type QuoteResponse } from "@/lib/api";
+import { fetchQuote, formatUnits, parseUnits, payAuthorize, postReceipt, type QuoteResponse } from "@/lib/api";
 import { prepareSameAssetUsdcPay } from "@/lib/pay-tx";
 
 type Phase =
@@ -89,13 +89,24 @@ export function PayForm({
         setQuote(null);
         return;
       }
+      if (orgId) {
+        const auth = await payAuthorize(orgId, q.amountIn);
+        if (!auth.ok) {
+          setPhase("refused");
+          setRefuseMsg(
+            `Spend limit exceeded (${formatUnits(auth.spent, 6)} / ${formatUnits(auth.limit, 6)} USDC used). No wallet prompt.`,
+          );
+          setQuote(null);
+          return;
+        }
+      }
       setQuote(q);
       setPhase("review");
     } catch {
       setPhase("network");
       setRefuseMsg("Network unavailable");
     }
-  }, [amountOut, bandBps, currency, eurcHidden, payee, reference]);
+  }, [amountOut, bandBps, currency, eurcHidden, orgId, payee, reference]);
 
   const onSend = useCallback(async () => {
     if (!quote || !isConnected || !address) return;
@@ -107,6 +118,22 @@ export function PayForm({
       setPhase("refused");
       setRefuseMsg("Refresh price");
       return;
+    }
+    if (orgId) {
+      try {
+        const auth = await payAuthorize(orgId, quote.amountIn);
+        if (!auth.ok) {
+          setPhase("refused");
+          setRefuseMsg(
+            `Spend limit exceeded (${formatUnits(auth.spent, 6)} / ${formatUnits(auth.limit, 6)} USDC used). No wallet prompt.`,
+          );
+          return;
+        }
+      } catch {
+        setPhase("network");
+        setRefuseMsg("Could not verify spend limit");
+        return;
+      }
     }
     setPhase("signing");
     setError("");

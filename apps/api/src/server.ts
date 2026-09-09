@@ -36,6 +36,8 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? "http://localhost:3000,h
   .map((s) => s.trim())
   .filter(Boolean);
 const AUTH_DOMAIN = process.env.PAIRBAND_AUTH_DOMAIN ?? "localhost:3000";
+/** Test-only escape hatch; production uses HttpOnly cookie only. */
+const ALLOW_HEADER_SESSION = process.env.ALLOW_HEADER_SESSION === "true";
 
 const db: Db = createDb(DATABASE_URL);
 const app = express();
@@ -90,8 +92,58 @@ function setSessionCookie(res: express.Response, token: string, expiresAt: Date)
   );
 }
 
+function getSessionToken(req: express.Request): string | null {
+  const cookie = parseCookie(req, "pairband_session");
+  if (cookie) return cookie;
+  if (ALLOW_HEADER_SESSION) {
+    return (req.headers["x-session-token"] as string | undefined) ?? null;
+  }
+  return null;
+}
+
+async function orgPayerSpendTotal(orgId: string, payer: string): Promise<bigint> {
+  const rows = await db
+    .select({ amountIn: receipts.amountIn, status: receipts.status })
+    .from(receipts)
+    .where(and(eq(receipts.orgId, orgId), eq(receipts.payer, payer)));
+  let total = 0n;
+  for (const r of rows) {
+    if (r.status === "settled" || r.status === "submitted") {
+      total += BigInt(r.amountIn);
+    }
+  }
+  return total;
+}
+
+async function checkSpendAuthorized(
+  membership: { spendLimitUsd: bigint | null },
+  orgId: string,
+  payer: string,
+  amountIn: bigint,
+): Promise<
+  | { ok: true; spent: string; remaining: string | null }
+  | { ok: false; spent: string; limit: string }
+> {
+  const spent = await orgPayerSpendTotal(orgId, payer);
+  if (membership.spendLimitUsd == null) {
+    return { ok: true, spent: spent.toString(), remaining: null };
+  }
+  if (spent + amountIn > membership.spendLimitUsd) {
+    return {
+      ok: false,
+      spent: spent.toString(),
+      limit: membership.spendLimitUsd.toString(),
+    };
+  }
+  return {
+    ok: true,
+    spent: spent.toString(),
+    remaining: (membership.spendLimitUsd - spent - amountIn).toString(),
+  };
+}
+
 async function getSessionUser(req: express.Request) {
-  const token = parseCookie(req, "pairband_session") ?? (req.headers["x-session-token"] as string | undefined);
+  const token = getSessionToken(req);
   if (!token) return null;
   const rows = await db
     .select({ user: users, session: sessions })
@@ -246,8 +298,7 @@ app.post("/v1/auth/verify", async (req, res) => {
     expiresAt,
   });
   setSessionCookie(res, token, expiresAt);
-  // Token also returned for SPA localStorage — prefer cookie-only in production harden pass.
-  res.json({ ok: true, address: user.address, token, expiresAt: expiresAt.toISOString() });
+  res.json({ ok: true, address: user.address, expiresAt: expiresAt.toISOString() });
   } catch (e) {
     console.error("auth/verify failed", e);
     res.status(500).json({ error: "auth_failed" });
@@ -255,7 +306,7 @@ app.post("/v1/auth/verify", async (req, res) => {
 });
 
 app.post("/v1/auth/logout", async (req, res) => {
-  const token = parseCookie(req, "pairband_session") ?? (req.headers["x-session-token"] as string | undefined);
+  const token = getSessionToken(req);
   if (token) {
     await db.delete(sessions).where(eq(sessions.tokenHash, hashToken(token)));
   }
@@ -399,6 +450,40 @@ app.post("/v1/orgs/:orgId/members", async (req, res) => {
       },
     });
   res.status(201).json({ ok: true });
+});
+
+app.post("/v1/orgs/:orgId/pay-authorize", async (req, res) => {
+  const auth = await requireOrgMember(req, req.params.orgId!, ["admin", "payer"]);
+  if ("error" in auth) {
+    res.status(auth.error === "unauthorized" ? 401 : 403).json({ error: auth.error });
+    return;
+  }
+  const schema = z.object({ amountIn: z.string().regex(/^\d+$/) });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "invalid_request" });
+    return;
+  }
+  const amountIn = BigInt(parsed.data.amountIn);
+  const result = await checkSpendAuthorized(
+    auth.membership,
+    req.params.orgId!,
+    auth.sess.user.address,
+    amountIn,
+  );
+  if (!result.ok) {
+    res.status(403).json({
+      error: "spend_limit_exceeded",
+      spent: result.spent,
+      limit: result.limit,
+    });
+    return;
+  }
+  res.json({
+    ok: true,
+    spent: result.spent,
+    remaining: result.remaining,
+  });
 });
 
 app.get("/v1/orgs/:orgId/payees", async (req, res) => {
@@ -608,23 +693,39 @@ app.post("/v1/receipts", async (req, res) => {
       res.status(auth.error === "unauthorized" ? 401 : 403).json({ error: auth.error });
       return;
     }
-    if (auth.membership.spendLimitUsd != null) {
-      const amount = BigInt(parsed.data.amountIn);
-      if (amount > auth.membership.spendLimitUsd) {
-        res.status(403).json({ error: "spend_limit_exceeded" });
-        return;
-      }
+    const spend = await checkSpendAuthorized(
+      auth.membership,
+      parsed.data.orgId,
+      payer,
+      BigInt(parsed.data.amountIn),
+    );
+    if (!spend.ok) {
+      res.status(403).json({
+        error: "spend_limit_exceeded",
+        spent: spend.spent,
+        limit: spend.limit,
+      });
+      return;
     }
   }
 
-  let status: string = parsed.data.status === "failed" ? "failed" : "submitted";
+  let status: string =
+    parsed.data.status === "failed"
+      ? "failed"
+      : parsed.data.status === "incomplete"
+        ? "incomplete"
+        : "submitted";
   if (parsed.data.status === "settled" || parsed.data.status === "submitted") {
-    const verified = await verifyPayTransaction(parsed.data.txHash as Hex);
+    const tokenOut = ACTIVE_CHAIN.tokens[parsed.data.tokenOut].address;
+    const verified = await verifyPayTransaction(parsed.data.txHash as Hex, {
+      payer,
+      payee: parsed.data.payee.toLowerCase(),
+      amountOut: BigInt(parsed.data.amountOut),
+      tokenOut,
+      reference: parsed.data.reference,
+      memoId: parsed.data.memoId as Hex | undefined,
+    });
     if (verified.ok) {
-      if (verified.from && verified.from !== payer) {
-        res.status(403).json({ error: "tx_from_mismatch" });
-        return;
-      }
       status = "settled";
     } else if (parsed.data.status === "settled") {
       res.status(409).json({

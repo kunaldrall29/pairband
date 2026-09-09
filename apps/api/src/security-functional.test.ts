@@ -18,6 +18,37 @@ async function json(path: string, init?: RequestInit) {
   return { res, body };
 }
 
+function sessionCookie(res: Response): string {
+  const rawCookies =
+    typeof res.headers.getSetCookie === "function"
+      ? res.headers.getSetCookie()
+      : [res.headers.get("set-cookie") ?? ""];
+  for (const raw of rawCookies) {
+    const match = raw.match(/pairband_session=([^;]+)/);
+    if (match) return `pairband_session=${decodeURIComponent(match[1])}`;
+  }
+  throw new Error("no_session_cookie");
+}
+
+async function siweSession(account: ReturnType<typeof privateKeyToAccount>) {
+  const nonceRes = await json("/v1/auth/nonce", {
+    method: "POST",
+    body: JSON.stringify({ address: account.address }),
+  });
+  const signature = await account.signMessage({ message: nonceRes.body.message });
+  const verify = await json("/v1/auth/verify", {
+    method: "POST",
+    body: JSON.stringify({
+      address: account.address,
+      message: nonceRes.body.message,
+      signature,
+    }),
+  });
+  assert.equal(verify.res.status, 200);
+  assert.equal(verify.body.token, undefined);
+  return sessionCookie(verify.res);
+}
+
 describe("security & functional API", () => {
   it("health and config expose testnet honesty flags", async () => {
     const health = await json("/health");
@@ -110,30 +141,15 @@ describe("security & functional API", () => {
     assert.ok(!String(body.message).includes("evil.example"));
   });
 
-  it("workspace: SIWE → create org → invite member → payee", async () => {
+  it("workspace: SIWE cookie session → create org → invite member → payee", async () => {
     const account = privateKeyToAccount(
       "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     );
-    const nonceRes = await json("/v1/auth/nonce", {
-      method: "POST",
-      body: JSON.stringify({ address: account.address }),
-    });
-    const signature = await account.signMessage({ message: nonceRes.body.message });
-    const verify = await json("/v1/auth/verify", {
-      method: "POST",
-      body: JSON.stringify({
-        address: account.address,
-        message: nonceRes.body.message,
-        signature,
-      }),
-    });
-    assert.equal(verify.res.status, 200);
-    const token = verify.body.token as string;
-    assert.ok(token);
+    const cookie = await siweSession(account);
 
     const org = await json("/v1/orgs", {
       method: "POST",
-      headers: { "x-session-token": token },
+      headers: { cookie },
       body: JSON.stringify({ name: `Audit Org ${Date.now()}` }),
     });
     assert.equal(org.res.status, 201);
@@ -142,7 +158,7 @@ describe("security & functional API", () => {
     const invitee = "0x2222222222222222222222222222222222222222";
     const member = await json(`/v1/orgs/${orgId}/members`, {
       method: "POST",
-      headers: { "x-session-token": token },
+      headers: { cookie },
       body: JSON.stringify({
         address: invitee,
         role: "payer",
@@ -153,7 +169,7 @@ describe("security & functional API", () => {
 
     const payee = await json(`/v1/orgs/${orgId}/payees`, {
       method: "POST",
-      headers: { "x-session-token": token },
+      headers: { cookie },
       body: JSON.stringify({
         address: "0x3333333333333333333333333333333333333333",
         label: "Contractor",
@@ -162,33 +178,56 @@ describe("security & functional API", () => {
     });
     assert.equal(payee.res.status, 201);
 
-    const members = await json(`/v1/orgs/${orgId}/members`, {
-      headers: { "x-session-token": token },
-    });
+    const members = await json(`/v1/orgs/${orgId}/members`, { headers: { cookie } });
     assert.ok(members.body.items.some((m: { address: string }) => m.address === invitee));
+  });
+
+  it("pay-authorize enforces cumulative spend limit before wallet", async () => {
+    const account = privateKeyToAccount(
+      "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    );
+    const cookie = await siweSession(account);
+    const org = await json("/v1/orgs", {
+      method: "POST",
+      headers: { cookie },
+      body: JSON.stringify({ name: `Limit Org ${Date.now()}`, defaultBandBps: 15 }),
+    });
+    const orgId = org.body.id as string;
+    await json(`/v1/orgs/${orgId}/members`, {
+      method: "POST",
+      headers: { cookie },
+      body: JSON.stringify({
+        address: account.address,
+        role: "payer",
+        spendLimitUsd: "2000000",
+      }),
+    });
+
+    const ok = await json(`/v1/orgs/${orgId}/pay-authorize`, {
+      method: "POST",
+      headers: { cookie },
+      body: JSON.stringify({ amountIn: "1500000" }),
+    });
+    assert.equal(ok.res.status, 200);
+    assert.equal(ok.body.ok, true);
+
+    const over = await json(`/v1/orgs/${orgId}/pay-authorize`, {
+      method: "POST",
+      headers: { cookie },
+      body: JSON.stringify({ amountIn: "3000000" }),
+    });
+    assert.equal(over.res.status, 403);
+    assert.equal(over.body.error, "spend_limit_exceeded");
   });
 
   it("settled receipt without real Memo tx is rejected", async () => {
     const account = privateKeyToAccount(
       "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
     );
-    const nonceRes = await json("/v1/auth/nonce", {
-      method: "POST",
-      body: JSON.stringify({ address: account.address }),
-    });
-    const signature = await account.signMessage({ message: nonceRes.body.message });
-    const verify = await json("/v1/auth/verify", {
-      method: "POST",
-      body: JSON.stringify({
-        address: account.address,
-        message: nonceRes.body.message,
-        signature,
-      }),
-    });
-    const token = verify.body.token as string;
+    const cookie = await siweSession(account);
     const { res, body } = await json("/v1/receipts", {
       method: "POST",
-      headers: { "x-session-token": token },
+      headers: { cookie },
       body: JSON.stringify({
         txHash: "0x" + "11".repeat(32),
         payee: "0x1111111111111111111111111111111111111111",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { API_ORIGIN, fetchActivity, formatUnits, type ActivityItem } from "@/lib/api";
+import { API_BASE, fetchActivity, formatUnits, type ActivityItem } from "@/lib/api";
 
 export function ActivityTable() {
   const [items, setItems] = useState<ActivityItem[]>([]);
@@ -24,7 +24,7 @@ export function ActivityTable() {
             Wire-style rows. Pending is never settled.
           </p>
         </div>
-        <a className="btn btn-secondary" href={`${API_ORIGIN}/v1/activity.csv`}>
+        <a className="btn btn-secondary" href={`${API_BASE}/v1/activity.csv`}>
           Export CSV
         </a>
       </div>

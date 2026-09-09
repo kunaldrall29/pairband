@@ -15,7 +15,7 @@
 | Area | Verdict |
 |------|---------|
 | Unit / typecheck / web build | Pass |
-| Security + functional API suite | **15/15 pass** (after remediation) |
+| Security + functional API suite | **16/16 pass** (cookie session + event decode + pay-authorize) |
 | Arc testnet live (read-only) | **6/6 pass** |
 | Wallet-broadcast Pay on faucet funds | **Not executed** (no funded test key in CI) |
 | External audit / mainnet readiness | **Not claimed** |
@@ -35,13 +35,18 @@ Several **high** issues were found and **fixed in this pass** before re-test.
 | S5 | High | SIWE domain taken from `Host` header (spoofable) | Fixed domain `PAIRBAND_AUTH_DOMAIN` |
 | S6 | Medium | Auth/DB errors crashed the Node process | try/catch on verify; schema migration repaired |
 
+## Medium findings (remediated in follow-up pass)
+
+| ID | Severity | Finding | Fix |
+|----|----------|---------|-----|
+| O1 | Medium | Session token in `localStorage` + `x-session-token` header | HttpOnly cookie only; Next.js `/api` rewrite; no token in verify JSON |
+| O2 | Medium | Onchain verify did not decode Transfer/Memo events | `verifyPayTransaction` decodes USDC Transfer + Memo event vs expected payee/amount/reference |
+| O3 | Medium | Spend limits only on receipt write | `POST /v1/orgs/:orgId/pay-authorize` + PayForm checks before wallet prompt |
+
 ## Remaining risks (accepted / open)
 
 | ID | Severity | Notes |
 |----|----------|-------|
-| O1 | Medium | Session token also stored in `localStorage` (XSS → session theft). Prefer cookie-only harden pass. |
-| O2 | Medium | Onchain verify checks Memo `to` + success, not Transfer/Memo event decode for amount/payee. Indexer follow-up. |
-| O3 | Medium | Spend limits enforced on receipt write, not before wallet prompt. |
 | O4 | Medium | No CSRF token on cookie session (mitigated by SameSite=Lax + allowlisted CORS). |
 | O5 | Low | Rate limits are in-memory (not shared across replicas). |
 | O6 | Info | EURC/Uniswap absent on Arc testnet — convert correctly refuse-closed. |
@@ -100,7 +105,7 @@ Wallet E2E (manual): faucet Arc testnet USDC → Workspace SIWE → Pay → conf
 
 ## Agent review cross-check
 
-[Security Review](bc-353cb6c3-3f2b-5601-815a-ef3a63bef884) independently flagged the same high-priority items (open activity, unauthenticated receipts, premature settled, CORS, SIWE Host binding, spend limits). Those were remediated in commit `b5d0844` and re-verified by the 15/15 suite above. Remaining accepted risks (localStorage session, event-level decode, pre-wallet limit UX) match that review’s open medium items.
+An independent security-review pass flagged the same high-priority items (open activity, unauthenticated receipts, premature settled, CORS, SIWE Host binding, spend limits). Those were remediated in commit `b5d0844`. Follow-up pass closed cookie-only sessions, event-level onchain decode, and pre-wallet spend authorization.
 
 ---
 

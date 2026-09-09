@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_ORIGIN ?? "http://localhost:3001";
+const API = "/api";
 
 export function EarlyAccessForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">("idle");
