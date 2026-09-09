@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, usePublicClient, useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { isAddressLike, validateMemo } from "@pairband/domain";
 import { ACTIVE_CHAIN } from "@pairband/config";
 import { fetchQuote, formatUnits, parseUnits, postReceipt, type QuoteResponse } from "@/lib/api";
@@ -40,6 +40,7 @@ export function PayForm({
   const [receiptId, setReceiptId] = useState<string | null>(null);
 
   const { sendTransactionAsync } = useSendTransaction();
+  const publicClient = usePublicClient();
   const wait = useWaitForTransactionReceipt({ hash: txHash });
 
   const eurcHidden = !ACTIVE_CHAIN.eurcRoutesEnabled;
@@ -123,8 +124,28 @@ export function PayForm({
       });
       setTxHash(hash);
       setPhase("confirming");
-      // Wait for inclusion before marking settled
-      // useWaitForTransactionReceipt will update; we also poll briefly
+      if (!publicClient) throw new Error("RPC unavailable");
+      const inclusion = await publicClient.waitForTransactionReceipt({ hash, confirmations: 1 });
+      if (inclusion.status !== "success") {
+        await postReceipt({
+          txHash: hash,
+          payee: payee as `0x${string}`,
+          payer: address,
+          orgId,
+          quoteId: quote.quoteId,
+          tokenOut: "USDC",
+          tokenIn: "USDC",
+          amountOut: quote.amountOut,
+          amountIn: quote.amountIn,
+          reference,
+          memoId: prepared.memoId,
+          status: "failed",
+          chainId: ACTIVE_CHAIN.chainId,
+        });
+        setPhase("failed");
+        setError("Transaction reverted on Arc.");
+        return;
+      }
       const row = await postReceipt({
         txHash: hash,
         payee: payee as `0x${string}`,
@@ -141,17 +162,23 @@ export function PayForm({
         chainId: ACTIVE_CHAIN.chainId,
       });
       setReceiptId(row.id);
-      setPhase("settled");
+      setPhase(row.status === "settled" ? "settled" : "failed");
+      if (row.status !== "settled") {
+        setError("Onchain verify rejected settled status.");
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "cancelled";
       if (/user rejected|denied|rejected/i.test(msg)) {
         setPhase("cancelled");
+      } else if (/unauthorized|sign in/i.test(msg)) {
+        setError("Sign in on Workspace before recording a receipt, or payment may have already left the wallet.");
+        setPhase("failed");
       } else {
         setError(msg);
         setPhase("failed");
       }
     }
-  }, [address, chainId, isConnected, orgId, payee, quote, reference, sendTransactionAsync]);
+  }, [address, chainId, isConnected, orgId, payee, publicClient, quote, reference, sendTransactionAsync]);
 
   if (phase === "settled" && quote) {
     return (

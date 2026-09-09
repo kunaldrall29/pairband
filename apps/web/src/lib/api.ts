@@ -45,7 +45,7 @@ export type ActivityItem = {
   tokenIn: "USDC" | "EURC";
   reference: string;
   memoId: string | null;
-  status: "settled" | "failed" | "incomplete";
+  status: "settled" | "failed" | "incomplete" | "submitted";
   chainId: number;
   createdAt: string;
   explorerUrl: string;
@@ -81,18 +81,35 @@ export async function postReceipt(
     quoteId?: string;
   },
 ) {
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("pairband_session");
+    if (token) headers["x-session-token"] = token;
+  }
   const res = await fetch(`${API_ORIGIN}/v1/receipts`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers,
     credentials: "include",
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error("receipt_failed");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error ?? "receipt_failed");
+  }
   return res.json() as Promise<ActivityItem>;
 }
 
 export async function fetchActivity(): Promise<ActivityItem[]> {
-  const res = await fetch(`${API_ORIGIN}/v1/activity`, { cache: "no-store" });
+  const headers: Record<string, string> = {};
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("pairband_session");
+    if (token) headers["x-session-token"] = token;
+  }
+  const res = await fetch(`${API_ORIGIN}/v1/activity`, {
+    cache: "no-store",
+    credentials: "include",
+    headers,
+  });
   if (!res.ok) throw new Error("activity_failed");
   const data = (await res.json()) as { items: ActivityItem[] };
   return data.items;

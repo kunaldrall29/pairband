@@ -4,18 +4,20 @@ Source of truth: `docs/PAIRBAND_BUILD_PLAN.md`. Options product deleted.
 
 | Item | Status |
 |------|--------|
-| Landing copy + outcome preview | Done |
-| Chain config + address book | Done |
-| Pay USDC via Arc `Memo.memo` (one tx) | Done |
-| Receipt + Activity + CSV | Done (Postgres) |
-| Banded EURC | Hidden — no Uniswap Quoter on Arc testnet |
-| SIWE + Workspace (orgs, roles, payees, limits) | Done |
-| Hold cash (idle lending) | Labeled off — no APY |
-| `PairbandPay` receipt helper | Scaffold only (optional; Memo is P0 path) |
-| v4 hook / convert fill | Not started — blocked on pool depth + audit |
+| Landing + outcome preview | Done |
+| Chain config | Done |
+| Pay USDC via Arc `Memo.memo` | Done (+ wait for inclusion) |
+| Receipt + Activity (authz) | Done — SIWE required; onchain verify for settled |
+| Workspace | Done |
+| EURC / convert | Refuse-closed |
+| Internal security + Arc verification | See `docs/review/SECURITY_AND_VERIFICATION_2026-09-09.md` |
+| Professional external audit | **Not done — do not claim** |
 
-## Honesty
+## Test commands
 
-- No custody. No APY. No options. No StableFX. No audit badge.
-- Testnet rehearsal (`5042002`). Mainnet addresses unbound until Circle publishes them.
-- Uniswap factory/router addresses probed empty on Arc testnet → EURC routes refuse loudly.
+```bash
+pnpm test && pnpm typecheck
+# with API up:
+PAIRBAND_API_URL=http://127.0.0.1:3001 pnpm --filter @pairband/api exec tsx --test \
+  src/security-functional.test.ts src/arc-live.test.ts
+```

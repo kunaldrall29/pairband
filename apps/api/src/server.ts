@@ -24,16 +24,30 @@ import {
   users,
   type Db,
 } from "@pairband/database";
-import { verifyMessage } from "viem";
+import { verifyMessage, type Hex } from "viem";
+import { verifyPayTransaction } from "./arc-verify";
 
 const PORT = Number(process.env.PORT ?? 3001);
 const DATABASE_URL =
   process.env.DATABASE_URL ?? "postgres://pairband:pairband@127.0.0.1:5432/pairband";
 const SESSION_DAYS = 14;
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ?? "http://localhost:3000,http://127.0.0.1:3000")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const AUTH_DOMAIN = process.env.PAIRBAND_AUTH_DOMAIN ?? "localhost:3000";
 
 const db: Db = createDb(DATABASE_URL);
 const app = express();
-app.use(cors({ origin: true, credentials: true }));
+app.use(
+  cors({
+    origin(origin, cb) {
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+      return cb(null, false);
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: "64kb" }));
 
 const quoteRateLimit = new Map<string, number[]>();
@@ -140,6 +154,10 @@ app.post("/v1/early-access", async (req, res) => {
 });
 
 app.post("/v1/auth/nonce", async (req, res) => {
+  if (!rateLimit(`auth:${clientKey(req)}`, 20)) {
+    res.status(429).json({ error: "rate_limited" });
+    return;
+  }
   const address = String(req.body?.address ?? "").toLowerCase();
   if (!isAddressLike(address)) {
     res.status(400).json({ error: "invalid_address" });
@@ -148,14 +166,13 @@ app.post("/v1/auth/nonce", async (req, res) => {
   const nonce = randomBytes(16).toString("hex");
   const expiresAt = new Date(Date.now() + 10 * 60_000);
   await db.insert(siweNonces).values({ nonce, address, expiresAt });
-  const domain = String(req.headers.host ?? "localhost:3000");
   const message = [
-    `${domain} wants you to sign in with your Ethereum account:`,
+    `${AUTH_DOMAIN} wants you to sign in with your Ethereum account:`,
     address,
     "",
     "Sign in to Pairband workspace.",
     "",
-    `URI: http://${domain}`,
+    `URI: https://${AUTH_DOMAIN}`,
     "Version: 1",
     `Chain ID: ${ACTIVE_CHAIN.chainId}`,
     `Nonce: ${nonce}`,
@@ -165,6 +182,11 @@ app.post("/v1/auth/nonce", async (req, res) => {
 });
 
 app.post("/v1/auth/verify", async (req, res) => {
+  try {
+  if (!rateLimit(`auth:${clientKey(req)}`, 20)) {
+    res.status(429).json({ error: "rate_limited" });
+    return;
+  }
   const schema = z.object({
     address: z.string(),
     message: z.string(),
@@ -180,6 +202,10 @@ app.post("/v1/auth/verify", async (req, res) => {
     res.status(400).json({ error: "invalid_address" });
     return;
   }
+  if (!parsed.data.message.includes(`${AUTH_DOMAIN} wants you`)) {
+    res.status(401).json({ error: "bad_domain" });
+    return;
+  }
   const nonceMatch = parsed.data.message.match(/Nonce: ([a-f0-9]+)/i);
   if (!nonceMatch) {
     res.status(400).json({ error: "missing_nonce" });
@@ -191,7 +217,7 @@ app.post("/v1/auth/verify", async (req, res) => {
     .from(siweNonces)
     .where(and(eq(siweNonces.nonce, nonce), gt(siweNonces.expiresAt, new Date())))
     .limit(1);
-  if (!nonceRows[0]) {
+  if (!nonceRows[0] || (nonceRows[0].address && nonceRows[0].address !== address)) {
     res.status(401).json({ error: "nonce_expired" });
     return;
   }
@@ -220,7 +246,12 @@ app.post("/v1/auth/verify", async (req, res) => {
     expiresAt,
   });
   setSessionCookie(res, token, expiresAt);
+  // Token also returned for SPA localStorage — prefer cookie-only in production harden pass.
   res.json({ ok: true, address: user.address, token, expiresAt: expiresAt.toISOString() });
+  } catch (e) {
+    console.error("auth/verify failed", e);
+    res.status(500).json({ error: "auth_failed" });
+  }
 });
 
 app.post("/v1/auth/logout", async (req, res) => {
@@ -545,16 +576,73 @@ const receiptSchema = z.object({
   amountIn: z.string().regex(/^\d+$/),
   reference: z.string().min(1).max(64),
   memoId: z.string().nullable().optional(),
-  status: z.enum(["settled", "failed", "incomplete"]),
+  /** Client may only submit submitted/failed; settled requires onchain verify. */
+  status: z.enum(["submitted", "failed", "incomplete", "settled"]).optional(),
   chainId: z.number().int(),
 });
 
 app.post("/v1/receipts", async (req, res) => {
+  const sess = await getSessionUser(req);
+  if (!sess) {
+    res.status(401).json({ error: "unauthorized" });
+    return;
+  }
   const parsed = receiptSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: "invalid_request" });
     return;
   }
+  if (parsed.data.chainId !== ACTIVE_CHAIN.chainId) {
+    res.status(400).json({ error: "wrong_chain" });
+    return;
+  }
+  const payer = (parsed.data.payer ?? sess.user.address).toLowerCase();
+  if (payer !== sess.user.address) {
+    res.status(403).json({ error: "payer_mismatch" });
+    return;
+  }
+
+  if (parsed.data.orgId) {
+    const auth = await requireOrgMember(req, parsed.data.orgId, ["admin", "payer"]);
+    if ("error" in auth) {
+      res.status(auth.error === "unauthorized" ? 401 : 403).json({ error: auth.error });
+      return;
+    }
+    if (auth.membership.spendLimitUsd != null) {
+      const amount = BigInt(parsed.data.amountIn);
+      if (amount > auth.membership.spendLimitUsd) {
+        res.status(403).json({ error: "spend_limit_exceeded" });
+        return;
+      }
+    }
+  }
+
+  let status: string = parsed.data.status === "failed" ? "failed" : "submitted";
+  if (parsed.data.status === "settled" || parsed.data.status === "submitted") {
+    const verified = await verifyPayTransaction(parsed.data.txHash as Hex);
+    if (verified.ok) {
+      if (verified.from && verified.from !== payer) {
+        res.status(403).json({ error: "tx_from_mismatch" });
+        return;
+      }
+      status = "settled";
+    } else if (parsed.data.status === "settled") {
+      res.status(409).json({
+        error: "not_settled_onchain",
+        reason: verified.reason,
+      });
+      return;
+    } else {
+      status = verified.reason === "rpc_unavailable" ? "submitted" : "incomplete";
+    }
+  }
+
+  const memoCheck = validateMemo(parsed.data.reference);
+  if (!memoCheck.ok) {
+    res.status(400).json({ error: memoCheck.error });
+    return;
+  }
+
   const explorerUrl = `${ACTIVE_CHAIN.explorerUrl}/tx/${parsed.data.txHash}`;
   const [row] = await db
     .insert(receipts)
@@ -562,7 +650,7 @@ app.post("/v1/receipts", async (req, res) => {
       txHash: parsed.data.txHash,
       quoteId: parsed.data.quoteId,
       payee: parsed.data.payee.toLowerCase(),
-      payer: parsed.data.payer?.toLowerCase(),
+      payer,
       orgId: parsed.data.orgId,
       memoId: parsed.data.memoId ?? null,
       tokenOut: parsed.data.tokenOut,
@@ -570,7 +658,7 @@ app.post("/v1/receipts", async (req, res) => {
       amountOut: parsed.data.amountOut,
       amountIn: parsed.data.amountIn,
       reference: parsed.data.reference,
-      status: parsed.data.status,
+      status,
       chainId: parsed.data.chainId,
       explorerUrl,
     })
@@ -579,6 +667,7 @@ app.post("/v1/receipts", async (req, res) => {
 });
 
 app.get("/v1/activity", async (req, res) => {
+  const sess = await getSessionUser(req);
   const address =
     typeof req.query.address === "string" ? req.query.address.toLowerCase() : null;
   const orgId = typeof req.query.orgId === "string" ? req.query.orgId : null;
@@ -596,14 +685,26 @@ app.get("/v1/activity", async (req, res) => {
       .orderBy(desc(receipts.createdAt))
       .limit(200);
   } else if (address) {
+    if (!sess || sess.user.address !== address) {
+      res.status(401).json({ error: "unauthorized" });
+      return;
+    }
     rows = await db
       .select()
       .from(receipts)
-      .where(eq(receipts.payee, address))
+      .where(eq(receipts.payer, address))
+      .orderBy(desc(receipts.createdAt))
+      .limit(200);
+  } else if (sess) {
+    rows = await db
+      .select()
+      .from(receipts)
+      .where(eq(receipts.payer, sess.user.address))
       .orderBy(desc(receipts.createdAt))
       .limit(200);
   } else {
-    rows = await db.select().from(receipts).orderBy(desc(receipts.createdAt)).limit(200);
+    res.status(401).json({ error: "unauthorized" });
+    return;
   }
   res.json({
     items: rows.map((r) => ({
@@ -626,6 +727,7 @@ app.get("/v1/activity", async (req, res) => {
 
 app.get("/v1/activity.csv", async (req, res) => {
   const orgId = typeof req.query.orgId === "string" ? req.query.orgId : null;
+  const sess = await getSessionUser(req);
   let rows;
   if (orgId) {
     const auth = await requireOrgMember(req, orgId, ["admin", "payer", "viewer"]);
@@ -634,8 +736,16 @@ app.get("/v1/activity.csv", async (req, res) => {
       return;
     }
     rows = await db.select().from(receipts).where(eq(receipts.orgId, orgId)).orderBy(desc(receipts.createdAt));
+  } else if (sess) {
+    rows = await db
+      .select()
+      .from(receipts)
+      .where(eq(receipts.payer, sess.user.address))
+      .orderBy(desc(receipts.createdAt))
+      .limit(500);
   } else {
-    rows = await db.select().from(receipts).orderBy(desc(receipts.createdAt)).limit(500);
+    res.status(401).json({ error: "unauthorized" });
+    return;
   }
   const header =
     "createdAt,txHash,payee,tokenOut,amountOut,tokenIn,amountIn,reference,memoId,status,explorerUrl";

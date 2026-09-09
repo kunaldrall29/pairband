@@ -11,7 +11,7 @@ export function ActivityTable() {
   useEffect(() => {
     fetchActivity()
       .then(setItems)
-      .catch(() => setError("Network unavailable"))
+      .catch(() => setError("Sign in required (Workspace) or network unavailable"))
       .finally(() => setLoading(false));
   }, []);
 
@@ -33,7 +33,7 @@ export function ActivityTable() {
         {error ? <p style={{ padding: "1.25rem", color: "var(--danger)" }}>{error}</p> : null}
         {!loading && !error && items.length === 0 ? (
           <p style={{ padding: "1.25rem" }} className="muted">
-            No receipts yet. Pay USDC to create the first row.
+            No receipts yet. Sign in on Workspace, then Pay USDC. Unauthenticated activity listing is disabled.
           </p>
         ) : null}
         {items.length > 0 ? (
