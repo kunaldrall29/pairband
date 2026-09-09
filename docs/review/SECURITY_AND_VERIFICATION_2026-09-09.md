@@ -98,6 +98,12 @@ Wallet E2E (manual): faucet Arc testnet USDC → Workspace SIWE → Pay → conf
 
 ---
 
+## Agent review cross-check
+
+[Security Review](bc-353cb6c3-3f2b-5601-815a-ef3a63bef884) independently flagged the same high-priority items (open activity, unauthenticated receipts, premature settled, CORS, SIWE Host binding, spend limits). Those were remediated in commit `b5d0844` and re-verified by the 15/15 suite above. Remaining accepted risks (localStorage session, event-level decode, pre-wallet limit UX) match that review’s open medium items.
+
+---
+
 ## Recommendation
 
 Ship testnet rehearsal with current hardenings. Engage an **external auditor** before any hook that moves size or before marketing “audited.” Do not enable EURC until Quoter + measured depth exist.
