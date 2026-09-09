@@ -1,85 +1,90 @@
-import { encodeFunctionData, erc20Abi, type Hex } from "viem";
+/**
+ * Arc Memo + USDC pay builders.
+ * Correct P0 path: one tx via Memo.memo(target, transferData, memoId, memoData)
+ * so msg.sender stays the EOA (CallFrom) and USDC + invoice leave together.
+ */
+import { encodeFunctionData, erc20Abi, toHex, type Hex } from "viem";
 import { ACTIVE_CHAIN } from "@pairband/config";
 
-/** Minimal Arc Memo write — bytes32 id + payload. Confirm ABI against live predeploy. */
 export const ARC_MEMO_ABI = [
   {
     type: "function",
-    name: "write",
+    name: "memo",
     stateMutability: "nonpayable",
     inputs: [
-      { name: "memoId", type: "bytes32" },
+      { name: "target", type: "address" },
       { name: "data", type: "bytes" },
+      { name: "memoId", type: "bytes32" },
+      { name: "memoData", type: "bytes" },
     ],
     outputs: [],
   },
+  {
+    type: "event",
+    name: "Memo",
+    anonymous: false,
+    inputs: [
+      { name: "sender", type: "address", indexed: true },
+      { name: "target", type: "address", indexed: true },
+      { name: "callDataHash", type: "bytes32", indexed: false },
+      { name: "memoId", type: "bytes32", indexed: true },
+      { name: "memo", type: "bytes", indexed: false },
+      { name: "memoIndex", type: "uint256", indexed: false },
+    ],
+  },
 ] as const;
 
+export const MULTICALL3_FROM = "0x522fAf9A91c41c443c66765030741e4AaCe147D0" as const;
+
 export function referenceToMemoId(reference: string): Hex {
-  // Deterministic bytes32 from UTF-8 reference (padded / hashed via simple encode).
-  const encoder = new TextEncoder();
-  const bytes = encoder.encode(reference.slice(0, 32));
+  const bytes = new TextEncoder().encode(reference.slice(0, 32));
   const hex = Array.from(bytes)
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
   return `0x${hex.padEnd(64, "0")}` as Hex;
 }
 
-export function buildUsdcTransfer(params: {
-  to: `0x${string}`;
-  amount: bigint;
-}): { to: `0x${string}`; data: Hex; value?: bigint } {
-  const data = encodeFunctionData({
-    abi: erc20Abi,
-    functionName: "transfer",
-    args: [params.to, params.amount],
-  });
-  return {
-    to: ACTIVE_CHAIN.tokens.USDC.address,
-    data,
-  };
+export function referenceToMemoBytes(reference: string): Hex {
+  return toHex(new TextEncoder().encode(reference));
 }
 
-export function buildMemoWrite(params: {
-  reference: string;
-}): { to: `0x${string}`; data: Hex } | null {
-  if (!ACTIVE_CHAIN.memo) return null;
-  const memoId = referenceToMemoId(params.reference);
-  const bytes = new TextEncoder().encode(params.reference);
-  const payload =
-    `0x${Array.from(bytes)
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("")}` as Hex;
-  const data = encodeFunctionData({
-    abi: ARC_MEMO_ABI,
-    functionName: "write",
-    args: [memoId, payload],
-  });
-  return { to: ACTIVE_CHAIN.memo, data };
-}
-
-/**
- * P0 path: two sequential txs (transfer then memo) when no multicall helper is deployed.
- * UI must never mark settled until both succeed (or memo-only failure → incomplete).
- */
-export type PreparedPayStep = {
-  label: string;
+export type PreparedPayTx = {
   to: `0x${string}`;
   data: Hex;
+  /** Explicit gas — Arc Memo estimation via eth_estimateGas is unreliable. */
+  gas: bigint;
+  memoId: Hex;
+  label: string;
 };
 
+/**
+ * Single-tx same-asset USDC pay with Arc Memo wrapper.
+ */
 export function prepareSameAssetUsdcPay(params: {
   payee: `0x${string}`;
   amount: bigint;
   reference: string;
-}): PreparedPayStep[] {
-  const transfer = buildUsdcTransfer({ to: params.payee, amount: params.amount });
-  const steps: PreparedPayStep[] = [
-    { label: "Transfer USDC", to: transfer.to, data: transfer.data },
-  ];
-  const memo = buildMemoWrite({ reference: params.reference });
-  if (memo) {
-    steps.push({ label: "Write memo", to: memo.to, data: memo.data });
+}): PreparedPayTx {
+  if (!ACTIVE_CHAIN.memo) {
+    throw new Error("Memo address not configured");
   }
-  return steps;
+  const transferData = encodeFunctionData({
+    abi: erc20Abi,
+    functionName: "transfer",
+    args: [params.payee, params.amount],
+  });
+  const memoId = referenceToMemoId(params.reference);
+  const memoData = referenceToMemoBytes(params.reference);
+  const data = encodeFunctionData({
+    abi: ARC_MEMO_ABI,
+    functionName: "memo",
+    args: [ACTIVE_CHAIN.tokens.USDC.address, transferData, memoId, memoData],
+  });
+  return {
+    to: ACTIVE_CHAIN.memo,
+    data,
+    gas: 350_000n,
+    memoId,
+    label: "Pay USDC + memo",
+  };
 }

@@ -10,6 +10,7 @@ const nav = [
   { href: "/app/pay", label: "Pay" },
   { href: "/app/convert", label: "Convert" },
   { href: "/app/activity", label: "Activity" },
+  { href: "/app/workspace", label: "Workspace" },
 ] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {

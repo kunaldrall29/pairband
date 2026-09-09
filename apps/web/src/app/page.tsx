@@ -1,5 +1,6 @@
 import { EarlyAccessForm } from "@/components/landing/EarlyAccessForm";
 import { HeroPayCard } from "@/components/landing/HeroPayCard";
+import { OutcomePreview } from "@/components/landing/OutcomePreview";
 import { PublicHeader } from "@/components/landing/PublicHeader";
 import {
   BuiltOn,
@@ -82,6 +83,7 @@ export default function LandingPage() {
         </section>
         <ThreeWays />
         <WhatHappens />
+        <OutcomePreview />
         <PairsTable />
         <TwoJobs />
         <BuiltOn />

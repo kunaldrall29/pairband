@@ -74,10 +74,17 @@ export async function fetchQuote(body: {
   return res.json();
 }
 
-export async function postReceipt(body: Omit<ActivityItem, "id" | "createdAt" | "explorerUrl">) {
+export async function postReceipt(
+  body: Omit<ActivityItem, "id" | "createdAt" | "explorerUrl"> & {
+    payer?: string;
+    orgId?: string;
+    quoteId?: string;
+  },
+) {
   const res = await fetch(`${API_ORIGIN}/v1/receipts`, {
     method: "POST",
     headers: { "content-type": "application/json" },
+    credentials: "include",
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error("receipt_failed");

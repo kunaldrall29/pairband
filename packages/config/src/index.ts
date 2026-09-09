@@ -30,6 +30,7 @@ export type ArcChainConfig = {
   tokens: Record<"USDC" | "EURC", ListedToken>;
   memo: HexAddress | null;
   permit2: HexAddress;
+  multicall3From: HexAddress;
   uniswapV3: UniswapV3Addresses;
   cctp: {
     domain: number;
@@ -45,6 +46,9 @@ export type ArcChainConfig = {
   defaultBandBps: number;
   quoteTtlMs: number;
 };
+
+/** Canonical Multicall3From on Arc (msg.sender preserved). */
+export const MULTICALL3_FROM = "0x522fAf9A91c41c443c66765030741e4AaCe147D0" as const;
 
 /** Canonical Permit2 (same on most EVM chains). */
 export const PERMIT2 = "0x000000000022D473030F116dDEE9F6B43aC78BA3" as const;
@@ -75,6 +79,7 @@ export const ARC_TESTNET: ArcChainConfig = {
   },
   memo: "0x5294E9927c3306DcBaDb03fe70b92e01cCede505",
   permit2: PERMIT2,
+  multicall3From: MULTICALL3_FROM,
   uniswapV3: {
     // Bind when verified on this chain; null → quote engine stubs / refuses FX.
     factory: null,
@@ -122,6 +127,7 @@ export const ARC_MAINNET: ArcChainConfig = {
   },
   memo: null,
   permit2: PERMIT2,
+  multicall3From: MULTICALL3_FROM,
   uniswapV3: {
     factory: null,
     swapRouter02: null,

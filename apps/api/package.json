@@ -13,9 +13,12 @@
   },
   "dependencies": {
     "@pairband/config": "workspace:*",
+    "@pairband/database": "workspace:*",
     "@pairband/domain": "workspace:*",
     "cors": "2.8.5",
+    "drizzle-orm": "0.44.4",
     "express": "4.21.2",
+    "viem": "2.33.3",
     "zod": "3.25.76"
   },
   "devDependencies": {

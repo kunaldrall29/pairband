@@ -12,15 +12,16 @@ describe("amount helpers", () => {
 });
 
 describe("pay tx prep", () => {
-  it("builds transfer + memo steps", () => {
-    const steps = prepareSameAssetUsdcPay({
+  it("builds single Memo-wrapped USDC transfer", () => {
+    const prepared = prepareSameAssetUsdcPay({
       payee: "0x1111111111111111111111111111111111111111",
       amount: 1_000_000n,
       reference: "INV-1042",
     });
-    assert.equal(steps.length, 2);
-    assert.equal(steps[0]!.label, "Transfer USDC");
-    assert.equal(steps[1]!.label, "Write memo");
+    assert.equal(prepared.label, "Pay USDC + memo");
+    assert.equal(prepared.to.toLowerCase(), "0x5294e9927c3306dcbadb03fe70b92e01ccede505");
+    assert.ok(prepared.data.startsWith("0x"));
+    assert.equal(prepared.gas, 350_000n);
     assert.match(referenceToMemoId("INV-1042"), /^0x[0-9a-f]{64}$/i);
   });
 });

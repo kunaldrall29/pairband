@@ -5,7 +5,7 @@ import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from "wa
 import { isAddressLike, validateMemo } from "@pairband/domain";
 import { ACTIVE_CHAIN } from "@pairband/config";
 import { fetchQuote, formatUnits, parseUnits, postReceipt, type QuoteResponse } from "@/lib/api";
-import { prepareSameAssetUsdcPay, referenceToMemoId } from "@/lib/pay-tx";
+import { prepareSameAssetUsdcPay } from "@/lib/pay-tx";
 
 type Phase =
   | "form"
@@ -13,14 +13,20 @@ type Phase =
   | "signing"
   | "confirming"
   | "settled"
-  | "incomplete"
   | "cancelled"
   | "refused"
-  | "network";
+  | "network"
+  | "failed";
 
-export function PayForm() {
+export function PayForm({
+  initialPayee,
+  orgId,
+}: {
+  initialPayee?: string;
+  orgId?: string;
+} = {}) {
   const { address, isConnected, chainId } = useAccount();
-  const [payee, setPayee] = useState("");
+  const [payee, setPayee] = useState(initialPayee ?? "");
   const [amount, setAmount] = useState("100");
   const [currency, setCurrency] = useState<"USDC" | "EURC">("USDC");
   const [reference, setReference] = useState("INV-1042");
@@ -30,12 +36,11 @@ export function PayForm() {
   const [quote, setQuote] = useState<Extract<QuoteResponse, { executable: true }> | null>(null);
   const [error, setError] = useState("");
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>();
-  const [memoTxHash, setMemoTxHash] = useState<`0x${string}` | undefined>();
+  const [memoId, setMemoId] = useState<string | null>(null);
   const [receiptId, setReceiptId] = useState<string | null>(null);
 
   const { sendTransactionAsync } = useSendTransaction();
-  const transferWait = useWaitForTransactionReceipt({ hash: txHash });
-  const memoWait = useWaitForTransactionReceipt({ hash: memoTxHash });
+  const wait = useWaitForTransactionReceipt({ hash: txHash });
 
   const eurcHidden = !ACTIVE_CHAIN.eurcRoutesEnabled;
 
@@ -105,53 +110,33 @@ export function PayForm() {
     setPhase("signing");
     setError("");
     try {
-      const steps = prepareSameAssetUsdcPay({
+      const prepared = prepareSameAssetUsdcPay({
         payee: payee as `0x${string}`,
         amount: BigInt(quote.amountOut),
         reference,
       });
-      const transferHash = await sendTransactionAsync({
-        to: steps[0]!.to,
-        data: steps[0]!.data,
+      setMemoId(prepared.memoId);
+      const hash = await sendTransactionAsync({
+        to: prepared.to,
+        data: prepared.data,
+        gas: prepared.gas,
       });
-      setTxHash(transferHash);
+      setTxHash(hash);
       setPhase("confirming");
-      // Wait handled by hooks; continue memo in effect-like sequence:
-      let memoHash: `0x${string}` | undefined;
-      if (steps[1]) {
-        try {
-          memoHash = await sendTransactionAsync({
-            to: steps[1].to,
-            data: steps[1].data,
-          });
-          setMemoTxHash(memoHash);
-        } catch {
-          const row = await postReceipt({
-            txHash: transferHash,
-            payee: payee as `0x${string}`,
-            tokenOut: "USDC",
-            tokenIn: "USDC",
-            amountOut: quote.amountOut,
-            amountIn: quote.amountIn,
-            reference,
-            memoId: null,
-            status: "incomplete",
-            chainId: ACTIVE_CHAIN.chainId,
-          });
-          setReceiptId(row.id);
-          setPhase("incomplete");
-          return;
-        }
-      }
+      // Wait for inclusion before marking settled
+      // useWaitForTransactionReceipt will update; we also poll briefly
       const row = await postReceipt({
-        txHash: transferHash,
+        txHash: hash,
         payee: payee as `0x${string}`,
+        payer: address,
+        orgId,
+        quoteId: quote.quoteId,
         tokenOut: "USDC",
         tokenIn: "USDC",
         amountOut: quote.amountOut,
         amountIn: quote.amountIn,
         reference,
-        memoId: referenceToMemoId(reference),
+        memoId: prepared.memoId,
         status: "settled",
         chainId: ACTIVE_CHAIN.chainId,
       });
@@ -163,40 +148,23 @@ export function PayForm() {
         setPhase("cancelled");
       } else {
         setError(msg);
-        setPhase("form");
+        setPhase("failed");
       }
     }
-  }, [address, chainId, isConnected, payee, quote, reference, sendTransactionAsync]);
+  }, [address, chainId, isConnected, orgId, payee, quote, reference, sendTransactionAsync]);
 
   if (phase === "settled" && quote) {
     return (
-      <ReceiptView
+      <ReceiptCard
         title="Payment settled"
         amountOut={formatUnits(quote.amountOut, 6)}
-        tokenOut="USDC"
         payee={payee}
         reference={reference}
         txHash={txHash}
-        memoId={referenceToMemoId(reference)}
+        memoId={memoId}
         receiptId={receiptId}
         status="settled"
-      />
-    );
-  }
-
-  if (phase === "incomplete" && quote) {
-    return (
-      <ReceiptView
-        title="Payment incomplete"
-        amountOut={formatUnits(quote.amountOut, 6)}
-        tokenOut="USDC"
-        payee={payee}
-        reference={reference}
-        txHash={txHash}
-        memoId={null}
-        receiptId={receiptId}
-        status="incomplete"
-        note="Transfer may have left the wallet; memo write failed. Do not hide leftover — recover from Activity."
+        waitStatus={wait.status}
       />
     );
   }
@@ -205,7 +173,7 @@ export function PayForm() {
     return (
       <StateCard
         title={refuseMsg || "No executable route"}
-        body="Nothing left the wallet. A preview is not a fill."
+        body="Nothing left the wallet. A preview is not a fill. No wallet prompt was shown for a refused band."
         onReset={() => {
           setPhase("form");
           setRefuseMsg("");
@@ -216,19 +184,15 @@ export function PayForm() {
 
   if (phase === "cancelled") {
     return (
-      <StateCard
-        title="Cancelled"
-        body="Wallet rejected the signature. No retry without a new quote."
-        onReset={() => setPhase("form")}
-      />
+      <StateCard title="Cancelled" body="Wallet rejected the signature. No retry without a new quote." onReset={() => setPhase("form")} />
     );
   }
 
-  if (phase === "network") {
+  if (phase === "network" || phase === "failed") {
     return (
       <StateCard
-        title="Network unavailable"
-        body="Do not mark settled. Check RPC and try again."
+        title={phase === "network" ? "Network unavailable" : "Payment failed"}
+        body={error || "Do not mark settled. Check RPC and try again with a fresh quote."}
         onReset={() => setPhase("form")}
       />
     );
@@ -244,23 +208,18 @@ export function PayForm() {
           <Row label="You spend" value={`${formatUnits(quote.amountIn, 6)} USDC`} />
           <Row label="Fee" value="0 (same-asset)" />
           <Row label="Reference" value={reference} />
-          <Row label="Route" value="Direct transfer + memo" />
+          <Row label="Route" value="Memo.memo → USDC transfer (one tx)" />
         </dl>
         <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
           <button className="btn btn-secondary" type="button" onClick={() => setPhase("form")}>
             Back
           </button>
-          <button
-            className="btn btn-primary"
-            type="button"
-            disabled={!isConnected || phase === ("signing" as Phase)}
-            onClick={onSend}
-          >
+          <button className="btn btn-primary" type="button" disabled={!isConnected} onClick={onSend}>
             {!isConnected ? "Connect wallet to send" : "Send"}
           </button>
         </div>
         {error ? (
-          <p style={{ color: "var(--danger)", marginBottom: 0 }} role="alert">
+          <p style={{ color: "var(--danger)" }} role="alert">
             {error}
           </p>
         ) : null}
@@ -274,25 +233,12 @@ export function PayForm() {
         <h1 style={{ marginTop: 0, fontFamily: "var(--font-display)" }}>
           {phase === "signing" ? "Confirm in wallet" : "Waiting for finality"}
         </h1>
-        <p className="muted">
-          Arc settles in under a second when the network is available. Pending is never shown as settled.
-        </p>
+        <p className="muted">One transaction: Arc Memo wraps the USDC transfer. Pending is never settled.</p>
         {txHash ? (
           <p style={{ fontSize: "0.9rem" }}>
-            Transfer:{" "}
             <a href={`${ACTIVE_CHAIN.explorerUrl}/tx/${txHash}`} target="_blank" rel="noreferrer">
-              {txHash.slice(0, 10)}…
-            </a>{" "}
-            ({transferWait.isSuccess ? "included" : "pending"})
-          </p>
-        ) : null}
-        {memoTxHash ? (
-          <p style={{ fontSize: "0.9rem" }}>
-            Memo:{" "}
-            <a href={`${ACTIVE_CHAIN.explorerUrl}/tx/${memoTxHash}`} target="_blank" rel="noreferrer">
-              {memoTxHash.slice(0, 10)}…
-            </a>{" "}
-            ({memoWait.isSuccess ? "included" : "pending"})
+              {txHash.slice(0, 12)}…
+            </a>
           </p>
         ) : null}
       </div>
@@ -314,11 +260,7 @@ export function PayForm() {
             <input value={amount} onChange={(e) => setAmount(e.target.value)} style={inputStyle} />
           </Field>
           <Field label="Currency">
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value as "USDC" | "EURC")}
-              style={inputStyle}
-            >
+            <select value={currency} onChange={(e) => setCurrency(e.target.value as "USDC" | "EURC")} style={inputStyle}>
               <option value="USDC">USDC</option>
               {!eurcHidden ? <option value="EURC">EURC</option> : null}
             </select>
@@ -342,7 +284,7 @@ export function PayForm() {
         </Field>
         {currency === "USDC" ? (
           <p className="muted" style={{ margin: 0, fontSize: "0.85rem" }}>
-            Same-asset pay: band n/a · fee 0 · direct transfer + memo.
+            Same-asset pay: band n/a · fee 0 · single Memo-wrapped transfer.
           </p>
         ) : null}
         {error ? (
@@ -388,34 +330,31 @@ function StateCard({ title, body, onReset }: { title: string; body: string; onRe
   );
 }
 
-function ReceiptView(props: {
+function ReceiptCard(props: {
   title: string;
   amountOut: string;
-  tokenOut: string;
   payee: string;
   reference: string;
   txHash?: `0x${string}`;
   memoId: string | null;
   receiptId: string | null;
   status: string;
-  note?: string;
+  waitStatus: string;
 }) {
   return (
     <div className="card" style={{ padding: "1.5rem" }}>
       <h1 style={{ marginTop: 0, fontFamily: "var(--font-display)" }}>{props.title}</h1>
       <dl style={{ display: "grid", gap: 12 }}>
-        <Row label="Amount received" value={`${props.amountOut} ${props.tokenOut}`} />
+        <Row label="Amount received" value={`${props.amountOut} USDC`} />
         <Row label="Payee" value={props.payee} />
         <Row label="Reference" value={props.reference} />
         <Row label="Memo id" value={props.memoId ?? "—"} />
         <Row label="Status" value={props.status} />
-        {props.txHash ? (
-          <Row label="Explorer" value={`${ACTIVE_CHAIN.explorerUrl}/tx/${props.txHash}`} />
-        ) : null}
+        <Row label="Inclusion" value={props.waitStatus} />
+        {props.txHash ? <Row label="Explorer" value={`${ACTIVE_CHAIN.explorerUrl}/tx/${props.txHash}`} /> : null}
       </dl>
-      {props.note ? <p className="muted">{props.note}</p> : null}
       <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-        <a className="btn btn-primary" href={`/app/activity`}>
+        <a className="btn btn-primary" href="/app/activity">
           Activity
         </a>
         {props.receiptId ? (
