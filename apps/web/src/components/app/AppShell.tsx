@@ -99,7 +99,7 @@ function WalletButton() {
 
   const wrong = chainId !== ACTIVE_CHAIN.chainId;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 10, maxWidth: "min(100%, 42rem)" }}>
       {wrong ? (
         <button
           className="btn btn-secondary"
@@ -109,11 +109,24 @@ function WalletButton() {
           Switch to Arc testnet
         </button>
       ) : (
-        <span className="muted" style={{ fontSize: "0.85rem", fontVariantNumeric: "tabular-nums" }}>
-          {address?.slice(0, 6)}…{address?.slice(-4)}
-        </span>
+        <div style={{ textAlign: "right", lineHeight: 1.25, minWidth: 0 }}>
+          <div className="muted" style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.04em" }}>
+            CONNECTED PAYER
+          </div>
+          <div
+            title={address}
+            style={{
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+              fontSize: "0.78rem",
+              fontWeight: 600,
+              wordBreak: "break-all",
+            }}
+          >
+            {address}
+          </div>
+        </div>
       )}
-      <button className="btn btn-secondary" style={{ padding: "0.45rem 0.85rem" }} onClick={() => disconnect()}>
+      <button className="btn btn-secondary" style={{ padding: "0.45rem 0.85rem", flexShrink: 0 }} onClick={() => disconnect()}>
         Disconnect
       </button>
     </div>

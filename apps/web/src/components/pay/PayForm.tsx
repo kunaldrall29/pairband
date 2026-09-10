@@ -257,7 +257,8 @@ export function PayForm({
       <div className="card" style={{ padding: "1.5rem" }}>
         <h1 style={{ marginTop: 0, fontFamily: "var(--font-display)", fontSize: "1.75rem" }}>Review</h1>
         <dl style={{ display: "grid", gap: 12 }}>
-          <Row label="Payee" value={payee} />
+          <Row label="Payer (you)" value={address ?? "—"} mono />
+          <Row label="Payee" value={payee} mono />
           <Row label="They receive" value={`${formatUnits(quote.amountOut, 6)} USDC`} />
           <Row label="You spend" value={`${formatUnits(quote.amountIn, 6)} USDC`} />
           <Row label="Fee" value="0 (same-asset)" />
@@ -363,11 +364,21 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "8rem 1fr", gap: 8 }}>
       <dt className="muted">{label}</dt>
-      <dd style={{ margin: 0, fontWeight: 600, wordBreak: "break-all" }}>{value}</dd>
+      <dd
+        style={{
+          margin: 0,
+          fontWeight: 600,
+          wordBreak: "break-all",
+          fontFamily: mono ? "ui-monospace, SFMono-Regular, Menlo, monospace" : undefined,
+          fontSize: mono ? "0.86rem" : undefined,
+        }}
+      >
+        {value}
+      </dd>
     </div>
   );
 }

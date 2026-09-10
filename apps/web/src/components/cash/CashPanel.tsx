@@ -62,6 +62,26 @@ export function CashPanel() {
       <p className="muted" style={{ marginTop: 0 }}>
         One spendable figure. Listed currencies under it. Not a yield number.
       </p>
+      <div style={{ margin: "1rem 0 0" }}>
+        <div className="muted" style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.04em" }}>
+          WALLET ADDRESS
+        </div>
+        <code
+          style={{
+            display: "block",
+            marginTop: 6,
+            wordBreak: "break-all",
+            fontSize: "0.9rem",
+            fontWeight: 600,
+            background: "#fff",
+            border: "1px solid var(--border)",
+            borderRadius: 10,
+            padding: "0.65rem 0.8rem",
+          }}
+        >
+          {address}
+        </code>
+      </div>
       <div style={{ marginTop: "1.5rem" }}>
         <div className="muted" style={{ fontSize: "0.85rem", fontWeight: 600 }}>
           Spendable USDC

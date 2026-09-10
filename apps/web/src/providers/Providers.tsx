@@ -5,7 +5,7 @@ import { useState, type ReactNode } from "react";
 import { http, createConfig, WagmiProvider } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { ACTIVE_CHAIN } from "@pairband/config";
-import { demoWalletConnector } from "./demo-wallet";
+import { BrowserWalletInstall } from "./browser-wallet-install";
 
 const arcTestnet = {
   id: ACTIVE_CHAIN.chainId,
@@ -19,15 +19,17 @@ const arcTestnet = {
   },
 } as const;
 
-/** Local/demo recording only. Never enable on production. */
-const DEMO_WALLET = process.env.NEXT_PUBLIC_DEMO_WALLET === "1";
-
+/**
+ * Injected wallet only (window.ethereum).
+ * For demos set NEXT_PUBLIC_BROWSER_WALLET=1 to install the Arc rehearsal provider
+ * that shows a connect prompt with the full payer address.
+ */
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
   const [config] = useState(() =>
     createConfig({
       chains: [arcTestnet],
-      connectors: DEMO_WALLET ? [demoWalletConnector()] : [injected()],
+      connectors: [injected({ shimDisconnect: true, unstable_shimAsyncInject: 2_000 })],
       transports: {
         [arcTestnet.id]: http(ACTIVE_CHAIN.rpcUrl, {
           fetchOptions: { headers: { "User-Agent": "Pairband/1.0" } },
@@ -39,7 +41,10 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserWalletInstall />
+        {children}
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }
