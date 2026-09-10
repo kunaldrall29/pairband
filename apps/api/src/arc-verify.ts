@@ -161,7 +161,10 @@ export async function verifyPayTransaction(
         });
         if (decoded.eventName !== "Memo") continue;
         const memoId = decoded.args.memoId.toLowerCase();
-        const memoBytes = toHex(decoded.args.memo).toLowerCase();
+        const rawMemo = decoded.args.memo;
+        const memoBytes = (
+          typeof rawMemo === "string" ? rawMemo : toHex(rawMemo)
+        ).toLowerCase();
         const target = decoded.args.target.toLowerCase();
         const callHash = decoded.args.callDataHash.toLowerCase();
         if (
@@ -172,7 +175,7 @@ export async function verifyPayTransaction(
         ) {
           memoMatch = {
             memoId: decoded.args.memoId,
-            memoBytes: toHex(decoded.args.memo),
+            memoBytes: (typeof rawMemo === "string" ? rawMemo : toHex(rawMemo)) as Hex,
             target,
           };
           break;

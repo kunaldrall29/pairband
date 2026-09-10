@@ -97,7 +97,8 @@ export const ARC_TESTNET: ArcChainConfig = {
   convertFeeBps: 20,
   treasury: null,
   defaultBandBps: 15,
-  quoteTtlMs: 8_000,
+  /** Long enough for human review between Preview and Send (was 8s — too short). */
+  quoteTtlMs: 120_000,
 };
 
 /**
@@ -143,7 +144,7 @@ export const ARC_MAINNET: ArcChainConfig = {
   convertFeeBps: 20,
   treasury: null,
   defaultBandBps: 15,
-  quoteTtlMs: 8_000,
+  quoteTtlMs: 120_000,
 };
 
 export const CHAINS = {

@@ -15,7 +15,8 @@ Pairband does not custody funds. The payer EOA must hold USDC on Arc before Pay.
 | Role | Address | Notes |
 |------|---------|--------|
 | **Payer (fund this)** | `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266` | Anvil account #0 — common dev default; import locally only |
-| **Payee (recipient)** | `0x70997970C51812dc3A010C7d01b50e0d17dc79C8` | Anvil account #1 — use as payee in Pay form |
+| **Payee (recipient)** | `0x1111111111111111111111111111111111111111` | Works for Arc testnet USDC transfers |
+| Avoid | `0x70997970C51812dc3A010C7d01b50e0d17dc79C8` | Anvil #1 — Arc USDC returns `Blocked address` |
 
 You may use any wallet you control for payer/payee; these are documented defaults for scripted rehearsal.
 
