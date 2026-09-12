@@ -1,0 +1,23 @@
+{
+  "name": "@pairband/agent",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "pairband": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/cli.js",
+    "propose": "node dist/cli.js propose"
+  },
+  "dependencies": {
+    "viem": "2.21.54",
+    "commander": "12.1.0",
+    "zod": "3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "5.7.2",
+    "@types/node": "22.10.2"
+  }
+}
