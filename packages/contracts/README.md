@@ -1,66 +1,39 @@
-## Foundry
+# @pairband/contracts
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Foundry workspace for Pairband (Uniswap v4 curated range vault).
 
-Foundry consists of:
+## Setup
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+```bash
+cd packages/contracts
+forge install
+forge test --via-ir
 ```
 
-### Test
+Dependencies (via `forge install` / existing `lib/`):
 
-```shell
-$ forge test
+- `v4-core`, `v4-periphery`
+- `uniswap-hooks` (OpenZeppelin BaseHook)
+- `openzeppelin-contracts`
+- `forge-std`, `solmate`
+
+## Layout
+
+```
+src/
+  PairbandHook.sol      # vault-gated liquidity + afterSwap telemetry
+  PairbandVault.sol     # ERC-20 shares, propose/execute rebalance, fee split
+  PairbandFactory.sol   # create vault, register hook, initialize pool
+  libraries/
+    BandMath.sol        # align / width / shift (|ΔL|+|ΔU|)
+    ShareMath.sol       # share mint/burn rounding
+    LiquidityAmounts.sol
+test/
+  BandMath.t.sol
+  PairbandHook.t.sol
+  PairbandVault.t.sol   # 13 acceptance cases
 ```
 
-### Format
+## Phase 0
 
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+Anvil (31337) + Unichain Sepolia (1301). Addresses live in `packages/config/deployments.json`.
