@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pairband
+      POSTGRES_PASSWORD: pairband
+      POSTGRES_DB: pairband
+    ports:
+      - "5432:5432"
+    volumes:
+      - pairband_pg:/var/lib/postgresql/data
+
+volumes:
+  pairband_pg:

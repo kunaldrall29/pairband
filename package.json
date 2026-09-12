@@ -1,0 +1,19 @@
+{
+  "name": "pairband",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @pairband/web --filter @pairband/api dev",
+    "dev:web": "pnpm --filter @pairband/web dev",
+    "dev:api": "pnpm --filter @pairband/api dev",
+    "db:migrate": "pnpm --filter @pairband/database migrate",
+    "build": "pnpm -r --filter @pairband/config --filter @pairband/domain --filter @pairband/database --filter @pairband/web --filter @pairband/api build",
+    "typecheck": "pnpm -r --filter @pairband/config --filter @pairband/domain --filter @pairband/database --filter @pairband/web --filter @pairband/api typecheck",
+    "test": "pnpm -r --filter @pairband/domain --filter @pairband/web --filter @pairband/api test",
+    "lint": "pnpm -r --filter @pairband/web --filter @pairband/api lint"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

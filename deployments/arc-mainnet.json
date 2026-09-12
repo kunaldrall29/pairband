@@ -1,0 +1,19 @@
+{
+  "network": "arc-mainnet",
+  "chainId": 5042,
+  "rpcUrl": null,
+  "explorerUrl": null,
+  "tokens": {
+    "USDC": null,
+    "EURC": null
+  },
+  "memo": null,
+  "uniswapV3": {
+    "factory": null,
+    "swapRouter02": null,
+    "quoterV2": null,
+    "universalRouter": null
+  },
+  "pairbandPay": null,
+  "notes": "Bind the day Circle publishes mainnet addresses. Do not ship production builds with zeros."
+}
