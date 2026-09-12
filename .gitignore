@@ -1,0 +1,36 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# next / build
+apps/web/.next/
+apps/web/out/
+**/dist/
+
+# foundry
+packages/contracts/cache/
+packages/contracts/out/
+packages/contracts/broadcast/
+packages/contracts/lib/
+
+# env / secrets — real keys never committed
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.local
+!**/.env.example
+*.pem
+
+# ide / os
+.DS_Store
+.idea/
+.vscode/
+
+# logs / coverage
+coverage/
+lcov.info
+*.log
+
+# generated
+packages/contracts/deployments.local.json

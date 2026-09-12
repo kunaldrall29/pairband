@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "chains": {
+    "31337": {
+      "name": "anvil",
+      "poolManager": null,
+      "positionManager": null,
+      "stateView": null,
+      "quoter": null,
+      "universalRouter": null,
+      "weth": null,
+      "pairbandHook": null,
+      "pairbandFactory": null,
+      "vaults": []
+    },
+    "1301": {
+      "name": "unichain-sepolia",
+      "poolManager": "0x00b036b58a818b1bc34d502d3fe730db729e62ac",
+      "positionManager": "0xf969aee60879c54baaed9f3ed26147db216fd664",
+      "stateView": "0xc199f1072a74d4e905aba1a84d9a45e2546b6222",
+      "quoter": "0x56dcd40a3f2d466f48e7f48bdbe5cc9b92ae4472",
+      "universalRouter": "0xf70536b3bcc1bd1a972dc186a2cf84cc6da6be5d",
+      "weth": "0x4200000000000000000000000000000000000006",
+      "usdc": "0x31d0220469e10c4E71834a79b1f276d740d3768F",
+      "pairbandHook": null,
+      "pairbandFactory": null,
+      "vaults": []
+    },
+    "130": {
+      "name": "unichain",
+      "poolManager": "0x1F98400000000000000000000000000000000004",
+      "positionManager": "0x4529a01c7a0410167c5740c487a8de60232617bf",
+      "stateView": "0x86e8631a016f9068c3f085faf484ee3f5fdee8f2",
+      "quoter": "0x333e3c607b141b18ff6de9f258db6e77fe7491e0",
+      "pairbandHook": null,
+      "pairbandFactory": null,
+      "vaults": [],
+      "note": "PHASE 1 — config only until Sepolia tests pass"
+    },
+    "8453": {
+      "name": "base",
+      "poolManager": "0x498581fF718922c3f8e6A244956aF099B2652b2b",
+      "positionManager": "0x7C5f5A4bBd8fD63184577525326123B519429bDc",
+      "pairbandHook": null,
+      "pairbandFactory": null,
+      "vaults": [],
+      "note": "PHASE 1 — config only"
+    }
+  }
+}

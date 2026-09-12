@@ -1,0 +1,22 @@
+{
+  "name": "pairband",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --filter @pairband/web dev",
+    "build": "pnpm --filter @pairband/web build",
+    "typecheck": "pnpm --filter @pairband/web typecheck",
+    "contracts:build": "pnpm --filter @pairband/contracts build",
+    "contracts:test": "pnpm --filter @pairband/contracts test",
+    "agent": "pnpm --filter @pairband/agent start",
+    "agent:whoami": "pnpm --filter @pairband/agent whoami",
+    "key:address": "bash scripts/with-key.sh address",
+    "deploy:anvil": "bash scripts/with-key.sh deploy-anvil",
+    "deploy:sepolia": "bash scripts/with-key.sh deploy-sepolia",
+    "demo:anvil": "bash scripts/with-key.sh demo-anvil"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
