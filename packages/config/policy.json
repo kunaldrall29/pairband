@@ -1,0 +1,11 @@
+{
+  "defaultPolicy": {
+    "maxWidth": 600,
+    "maxShift": 240,
+    "minCooldown": 3600,
+    "protocolFeeBps": 50,
+    "performanceFeeBps": 1000,
+    "proposalDelay": 3600,
+    "notes": "protocolFeeBps of collected swap fees only; cap 200. performanceFeeBps of remaining fees as curator shares."
+  }
+}

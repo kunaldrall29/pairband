@@ -1,0 +1,32 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# next
+apps/web/.next/
+apps/web/out/
+
+# foundry
+packages/contracts/cache/
+packages/contracts/out/
+packages/contracts/broadcast/
+packages/contracts/lib/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# ide / os
+.DS_Store
+.idea/
+.vscode/
+
+# logs / coverage
+coverage/
+lcov.info
+*.log
+
+# generated
+packages/contracts/deployments.local.json

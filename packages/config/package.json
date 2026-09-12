@@ -1,0 +1,10 @@
+{
+  "name": "@pairband/config",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./deployments.json": "./deployments.json",
+    "./policy.json": "./policy.json"
+  }
+}
