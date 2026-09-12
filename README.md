@@ -44,8 +44,21 @@ LP  --deposit/withdraw-->  PairbandVault (ERC-20 shares)
 
 ```bash
 cd packages/contracts
+forge install
 forge test --via-ir
 ```
+
+### Operator key (deploy / agent — local only)
+
+```bash
+cp .env.example .env                         # gitignored
+cp packages/contracts/.env.example packages/contracts/.env
+# Demo key address: pnpm key:address
+pnpm deploy:anvil                            # uses PRIVATE_KEY from .env
+pnpm agent:whoami                            # uses PAIRBAND_AGENT_KEY
+```
+
+Keys stay in `.env` (gitignored). Never `NEXT_PUBLIC_*`, never MCP client config for user funds.
 
 Phase 0 targets: Anvil (31337) + Unichain Sepolia (1301). No mainnet. No audit.
 

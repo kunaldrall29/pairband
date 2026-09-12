@@ -1,8 +1,16 @@
 #!/usr/bin/env node
+import { config as loadEnv } from "dotenv";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import { createWalletClient, createPublicClient, http, parseAbi, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { suggestBand } from "./suggestBand.js";
+
+// Load packages/agent/.env then repo-root .env (operator machine only).
+const here = dirname(fileURLToPath(import.meta.url));
+loadEnv({ path: resolve(here, "../.env") });
+loadEnv({ path: resolve(here, "../../../.env") });
 
 const vaultAbi = parseAbi([
   "function proposeRebalance(int24 tickLower, int24 tickUpper, uint128 amount0Min, uint128 amount1Min)",
@@ -34,15 +42,32 @@ program
   });
 
 program
+  .command("whoami")
+  .description("Print address derived from PAIRBAND_AGENT_KEY")
+  .action(() => {
+    const pk = process.env.PAIRBAND_AGENT_KEY ?? process.env.PRIVATE_KEY;
+    if (!pk) {
+      console.error("PAIRBAND_AGENT_KEY not set (packages/agent/.env or repo .env)");
+      process.exit(1);
+    }
+    const account = privateKeyToAccount(pk as Hex);
+    console.log(JSON.stringify({ address: account.address }));
+  });
+
+program
   .command("propose")
   .requiredOption("--vault <address>")
-  .requiredOption("--rpc <url>")
+  .option("--rpc <url>", "RPC URL", process.env.RPC_URL ?? process.env.UNICHAIN_SEPOLIA_RPC_URL)
   .option("--key <hex>", "Private key via env PAIRBAND_AGENT_KEY if omitted")
   .option("--tick <n>", "Current tick (required unless --slot0-from is used)")
   .action(async (opts) => {
-    const pk = (opts.key as string | undefined) ?? process.env.PAIRBAND_AGENT_KEY;
+    const pk = (opts.key as string | undefined) ?? process.env.PAIRBAND_AGENT_KEY ?? process.env.PRIVATE_KEY;
     if (!pk) {
       console.error("Set PAIRBAND_AGENT_KEY or pass --key. Never put keys in the browser.");
+      process.exit(1);
+    }
+    if (!opts.rpc) {
+      console.error("Pass --rpc or set RPC_URL / UNICHAIN_SEPOLIA_RPC_URL");
       process.exit(1);
     }
     const account = privateKeyToAccount(pk as Hex);
